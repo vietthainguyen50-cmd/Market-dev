@@ -271,3 +271,5 @@ Không lưu email/mật khẩu admin trong source code và không cập nhật h
 ## Trạng thái dự án
 
 Bước 5 đã hoàn thành model, seed, trang công khai và quản lý danh mục theo quyền admin, đồng thời giữ nguyên đăng ký, đăng nhập, session và đăng xuất của các bước trước. Dự án chưa có model Listing/sản phẩm, upload ảnh, JWT, trang cá nhân, admin dashboard hoàn chỉnh, yêu thích hoặc chat.
+#   M a r k e t - d e v  
+ 
