@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+<section class="section-space">
+  <div class="container">
+    <a class="link-secondary d-inline-block mb-4" href="/categories">
+      ← Quay lại danh mục
+    </a>
+
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-5">
+        <div class="category-detail-media">
+          <% if (category.image) { %>
+            <img
+              class="category-image"
+              src="<%= category.image %>"
+              alt="Ảnh danh mục <%= category.name %>"
+            >
+          <% } else { %>
+            <div class="category-placeholder category-placeholder-large" aria-hidden="true">
+              <span><%= category.name.charAt(0).toUpperCase() %></span>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <p class="section-kicker">Danh mục sản phẩm</p>
+        <h1 class="display-5 fw-bold mb-3"><%= category.name %></h1>
+        <p class="lead text-secondary mb-0">
+          <%= category.description || 'Danh mục này chưa có mô tả.' %>
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-white border rounded-4 p-4 p-md-5 mt-5 text-center">
+      <h2 class="h4 fw-bold mb-2">Sản phẩm trong danh mục</h2>
+      <p class="text-secondary mb-0">Hiện chưa có sản phẩm nào trong danh mục này.</p>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

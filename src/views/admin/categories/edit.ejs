@@ -1,0 +1,25 @@
+<%- include('../../partials/header') %>
+
+<section class="auth-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8 col-xl-7">
+        <div class="auth-panel bg-white border shadow-sm p-4 p-md-5">
+          <p class="section-kicker">Quản lý danh mục</p>
+          <h1 class="h2 fw-bold mb-2">Chỉnh sửa danh mục</h1>
+          <p class="text-secondary mb-1">Slug hiện tại:</p>
+          <p class="mb-4"><code><%= category.slug %></code></p>
+
+          <%- include('_form', {
+            formAction: '/admin/categories/' + category._id + '?_method=PUT',
+            submitLabel: 'Lưu thay đổi',
+            errors,
+            oldInput
+          }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../../partials/footer') %>

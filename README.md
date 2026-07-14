@@ -1,6 +1,6 @@
 # NTT Marketplace
 
-NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB và đăng xuất; trang chủ vẫn dùng dữ liệu tĩnh để minh họa giao diện.
+NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB, đăng xuất và quản lý danh mục; trang chủ lấy danh mục từ MongoDB nhưng vẫn giữ sản phẩm tĩnh để minh họa giao diện.
 
 ## Công nghệ đang sử dụng
 
@@ -16,12 +16,13 @@ NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, 
 - express-validator
 - express-session
 - connect-mongo
+- slugify
 - Nodemon (development)
 - CommonJS
 
 ## Yêu cầu
 
-- Node.js 18 trở lên
+- Node.js 20.8 trở lên
 - npm đi kèm Node.js
 - MongoDB local đang chạy hoặc một MongoDB Atlas cluster có thể truy cập
 
@@ -59,11 +60,11 @@ npm --version
    ```env
    NODE_ENV=development
    PORT=3000
-MONGODB_URI=mongodb://127.0.0.1:27017/ntt_marketplace
-SESSION_SECRET=replace_with_a_long_random_secret
-SESSION_COOKIE_NAME=ntt_marketplace_sid
-SESSION_MAX_AGE_MS=604800000
-```
+   MONGODB_URI=mongodb://127.0.0.1:27017/ntt_marketplace
+   SESSION_SECRET=replace_with_a_long_random_secret
+   SESSION_COOKIE_NAME=ntt_marketplace_sid
+   SESSION_MAX_AGE_MS=604800000
+   ```
 
    Tạo `SESSION_SECRET` mạnh bằng lệnh sau rồi chỉ lưu kết quả vào `.env` local:
 
@@ -174,6 +175,43 @@ Các biến session bắt buộc hoặc được hỗ trợ:
 
 CSRF protection chưa được triển khai trong Bước 4 và sẽ được bổ sung ở giai đoạn bảo mật sau. Phiên bản này cũng chưa có trang cá nhân, phân quyền/admin dashboard hoặc JWT.
 
+## Danh mục sản phẩm
+
+Bước 5 đã bổ sung model `Category`, tự động tạo slug tiếng Việt bằng `slugify`, danh sách/chi tiết danh mục công khai và khu vực quản lý dành riêng cho admin. Danh mục có các trường `name`, `slug`, `description`, `image`, `status`, `createdAt` và `updatedAt`. Trạng thái chỉ nhận `active` hoặc `inactive`; danh mục inactive không xuất hiện trên trang chủ hoặc các route công khai.
+
+Route công khai:
+
+- `GET /categories`: danh sách danh mục active.
+- `GET /categories/:slug`: chi tiết một danh mục active; slug không tồn tại hoặc inactive trả 404.
+
+Route quản trị, tất cả đều yêu cầu `req.user.role === "admin"`:
+
+- `GET /admin/categories`
+- `GET /admin/categories/create`
+- `POST /admin/categories`
+- `GET /admin/categories/:id/edit`
+- `PUT /admin/categories/:id`
+- `PATCH /admin/categories/:id/status`
+
+Ứng dụng không nhận slug từ form. Service tự tạo slug từ tên, kiểm tra trùng name/slug trước khi ghi và vẫn xử lý duplicate key từ MongoDB để tránh lỗi kỹ thuật `E11000` xuất hiện trên giao diện. Category chỉ được ẩn bằng status, không có route DELETE.
+
+Tạo dữ liệu danh mục ban đầu bằng lệnh:
+
+```bash
+npm run seed:categories
+```
+
+Seed chỉ thêm những danh mục còn thiếu bằng `$setOnInsert`; không xóa hoặc ghi đè danh mục đã được admin chỉnh sửa. Có thể chạy lại lệnh mà không tạo dữ liệu trùng.
+
+Để tạo tài khoản admin test an toàn:
+
+1. Đăng ký một tài khoản test riêng trên website.
+2. Trong MongoDB Atlas, mở database `ntt_marketplace` và collection `users`.
+3. Tìm đúng email test rồi chỉ đổi trường `role` của document đó từ `user` thành `admin`.
+4. Đăng xuất và đăng nhập lại trước khi mở `/admin/categories`.
+
+Không lưu email/mật khẩu admin trong source code và không cập nhật hàng loạt user. Bước 5 chưa có model Listing/sản phẩm và chưa có upload ảnh; trường `image` chỉ nhận URL hoặc đường dẫn static đã tồn tại. CSRF protection vẫn chưa được triển khai.
+
 ## Cấu trúc cơ bản
 
 ```text
@@ -184,24 +222,35 @@ CSRF protection chưa được triển khai trong Bước 4 và sẽ được b�
 │   │   └── session.js
 │   ├── controllers/
 │   │   ├── auth.controller.js
+│   │   ├── category.controller.js
 │   │   └── home.controller.js
 │   ├── middlewares/
+│   │   ├── admin.middleware.js
 │   │   ├── auth.middleware.js
 │   │   ├── error.middleware.js
 │   │   └── notFound.middleware.js
 │   ├── models/
+│   │   ├── Category.js
 │   │   └── User.js
 │   ├── routes/
+│   │   ├── adminCategory.routes.js
 │   │   ├── auth.routes.js
+│   │   ├── category.routes.js
 │   │   └── home.routes.js
 │   ├── services/
-│   │   └── auth.service.js
+│   │   ├── auth.service.js
+│   │   └── category.service.js
+│   ├── utils/
+│   │   └── createSlug.js
 │   ├── validators/
-│   │   └── auth.validator.js
+│   │   ├── auth.validator.js
+│   │   └── category.validator.js
 │   ├── views/
+│   │   ├── admin/categories/
 │   │   ├── auth/
 │   │   │   ├── login.ejs
 │   │   │   └── register.ejs
+│   │   ├── categories/
 │   │   ├── errors/
 │   │   ├── layouts/
 │   │   ├── partials/
@@ -211,6 +260,8 @@ CSRF protection chưa được triển khai trong Bước 4 và sẽ được b�
 │   │   ├── images/
 │   │   └── js/
 │   └── app.js
+├── scripts/
+│   └── seedCategories.js
 ├── .env.example
 ├── package.json
 ├── server.js
@@ -219,4 +270,4 @@ CSRF protection chưa được triển khai trong Bước 4 và sẽ được b�
 
 ## Trạng thái dự án
 
-Bước 4 đã hoàn thành đăng nhập, session lưu trong MongoDB và đăng xuất bằng POST, đồng thời giữ nguyên đăng ký tài khoản, validation phía server, xử lý email trùng và hash mật khẩu của Bước 3. Dự án chưa có JWT, trang cá nhân, phân quyền/admin dashboard, đăng sản phẩm, upload ảnh, yêu thích hoặc chat.
+Bước 5 đã hoàn thành model, seed, trang công khai và quản lý danh mục theo quyền admin, đồng thời giữ nguyên đăng ký, đăng nhập, session và đăng xuất của các bước trước. Dự án chưa có model Listing/sản phẩm, upload ảnh, JWT, trang cá nhân, admin dashboard hoàn chỉnh, yêu thích hoặc chat.

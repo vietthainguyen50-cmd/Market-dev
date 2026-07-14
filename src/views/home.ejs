@@ -45,19 +45,41 @@
         <p class="section-kicker">Danh mục nổi bật</p>
         <h2 class="fw-bold mb-0">Bạn đang tìm gì?</h2>
       </div>
-      <p class="text-secondary mb-0">Khám phá những nhóm sản phẩm được quan tâm.</p>
+      <a class="link-primary fw-semibold" href="/categories">Xem tất cả danh mục</a>
     </div>
-    <div class="row g-4 mt-3">
-      <% categories.forEach((category) => { %>
-        <div class="col-6 col-lg-3">
-          <article class="category-card h-100">
-            <span class="category-icon" aria-hidden="true"><%= category.icon %></span>
-            <h3 class="h5 fw-bold mt-3 mb-1"><%= category.name %></h3>
-            <p class="small text-secondary mb-0"><%= category.description %></p>
-          </article>
-        </div>
-      <% }); %>
-    </div>
+    <% if (categories.length > 0) { %>
+      <div class="row g-4 mt-3">
+        <% categories.forEach((category) => { %>
+          <div class="col-6 col-lg-3">
+            <a class="category-card-link" href="/categories/<%= category.slug %>">
+              <article class="category-card h-100">
+                <div class="category-media mb-3">
+                  <% if (category.image) { %>
+                    <img
+                      class="category-image"
+                      src="<%= category.image %>"
+                      alt="Ảnh danh mục <%= category.name %>"
+                    >
+                  <% } else { %>
+                    <div class="category-placeholder" aria-hidden="true">
+                      <span><%= category.name.charAt(0).toUpperCase() %></span>
+                    </div>
+                  <% } %>
+                </div>
+                <h3 class="h5 fw-bold mb-1"><%= category.name %></h3>
+                <p class="small text-secondary mb-0">
+                  <%= category.description || 'Khám phá sản phẩm trong danh mục này.' %>
+                </p>
+              </article>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info mt-4 mb-0" role="status">
+        Hiện chưa có danh mục đang hoạt động.
+      </div>
+    <% } %>
   </div>
 </section>
 

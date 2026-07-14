@@ -1,9 +1,4 @@
-const categories = [
-  { name: 'Điện thoại', icon: '📱', description: 'Điện thoại và phụ kiện' },
-  { name: 'Laptop', icon: '💻', description: 'Máy tính và thiết bị số' },
-  { name: 'Xe cộ', icon: '🛵', description: 'Xe máy và xe đạp' },
-  { name: 'Gia dụng', icon: '🪑', description: 'Nội thất và đồ gia dụng' },
-];
+const categoryService = require('../services/category.service');
 
 const products = [
   {
@@ -47,17 +42,22 @@ const formatPrice = (price) =>
     maximumFractionDigits: 0,
   }).format(price);
 
-const getHome = (req, res) => {
-  const featuredProducts = products.map((product) => ({
-    ...product,
-    formattedPrice: formatPrice(product.price),
-  }));
+const getHome = async (req, res, next) => {
+  try {
+    const categories = await categoryService.getActiveCategories();
+    const featuredProducts = products.map((product) => ({
+      ...product,
+      formattedPrice: formatPrice(product.price),
+    }));
 
-  res.render('home', {
-    pageTitle: 'Mua bán đồ cũ an toàn, tiện lợi',
-    categories,
-    products: featuredProducts,
-  });
+    return res.render('home', {
+      pageTitle: 'Mua bán đồ cũ an toàn, tiện lợi',
+      categories,
+      products: featuredProducts,
+    });
+  } catch (error) {
+    return next(error);
+  }
 };
 
 module.exports = {

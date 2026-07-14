@@ -5,7 +5,9 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 
 const { createSessionMiddleware } = require('./config/session');
+const adminCategoryRoutes = require('./routes/adminCategory.routes');
 const authRoutes = require('./routes/auth.routes');
+const categoryRoutes = require('./routes/category.routes');
 const homeRoutes = require('./routes/home.routes');
 const { loadCurrentUser } = require('./middlewares/auth.middleware');
 const notFoundMiddleware = require('./middlewares/notFound.middleware');
@@ -36,7 +38,7 @@ app.use(
         styleSrc: ["'self'", 'https://cdn.jsdelivr.net'],
         scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
         fontSrc: ["'self'", 'https://cdn.jsdelivr.net', 'data:'],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'http:'],
         upgradeInsecureRequests: null,
       },
     },
@@ -53,6 +55,8 @@ app.use(createSessionMiddleware());
 app.use(loadCurrentUser);
 
 app.use('/', authRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/admin/categories', adminCategoryRoutes);
 app.use('/', homeRoutes);
 
 app.use(notFoundMiddleware);
