@@ -9,6 +9,7 @@ const adminCategoryRoutes = require('./routes/adminCategory.routes');
 const authRoutes = require('./routes/auth.routes');
 const categoryRoutes = require('./routes/category.routes');
 const homeRoutes = require('./routes/home.routes');
+const listingRoutes = require('./routes/listing.routes');
 const { loadCurrentUser } = require('./middlewares/auth.middleware');
 const notFoundMiddleware = require('./middlewares/notFound.middleware');
 const errorMiddleware = require('./middlewares/error.middleware');
@@ -55,6 +56,7 @@ app.use(createSessionMiddleware());
 app.use(loadCurrentUser);
 
 app.use('/', authRoutes);
+app.use('/', listingRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/admin/categories', adminCategoryRoutes);
 app.use('/', homeRoutes);

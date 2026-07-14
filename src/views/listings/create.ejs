@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<section class="auth-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-9 col-xl-8">
+        <div class="auth-panel bg-white border shadow-sm p-4 p-md-5">
+          <p class="section-kicker">Marketplace</p>
+          <h1 class="h2 fw-bold mb-2">Đăng sản phẩm</h1>
+          <p class="text-secondary mb-4">Chia sẻ thông tin rõ ràng để người mua dễ dàng liên hệ.</p>
+
+          <% if (!canSubmit) { %>
+            <div class="alert alert-warning" role="alert">
+              Hiện chưa có danh mục hoạt động. Bạn chưa thể tạo bài đăng.
+            </div>
+          <% } %>
+
+          <%- include('_form', {
+            formAction: '/listings',
+            submitLabel: 'Đăng sản phẩm',
+            cancelUrl: '/listings',
+            canSubmit,
+            categories,
+            errors,
+            oldInput
+          }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

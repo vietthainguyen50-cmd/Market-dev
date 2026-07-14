@@ -1,0 +1,33 @@
+<article class="card product-card h-100 border-0">
+  <div class="listing-placeholder position-relative" aria-hidden="true">
+    <span>NTT</span>
+    <% if (listing.status === 'sold') { %>
+      <span class="badge text-bg-danger listing-status-overlay">Đã bán</span>
+    <% } %>
+  </div>
+  <div class="card-body p-4 d-flex flex-column">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="condition-badge"><%= listing.conditionLabel %></span>
+      <% if (listing.status === 'sold') { %>
+        <span class="badge text-bg-danger">Đã bán</span>
+      <% } %>
+    </div>
+    <h2 class="h5 fw-bold mb-2"><%= listing.title %></h2>
+    <p class="product-price mb-2"><%= listing.formattedPrice %></p>
+    <p class="small text-secondary mb-1">
+      Danh mục:
+      <% if (listing.category) { %>
+        <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
+      <% } else { %>
+        Không còn tồn tại
+      <% } %>
+    </p>
+    <p class="small text-secondary mb-1">
+      <span aria-hidden="true">📍</span> <%= listing.location %>
+    </p>
+    <p class="small text-secondary mb-3">Đăng ngày <%= listing.formattedCreatedAt %></p>
+    <a class="btn btn-outline-primary mt-auto" href="/listings/<%= listing._id %>">
+      Xem chi tiết
+    </a>
+  </div>
+</article>

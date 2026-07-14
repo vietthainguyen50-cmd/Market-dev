@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<section class="section-space">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+      <div>
+        <p class="section-kicker">Marketplace</p>
+        <h1 class="fw-bold mb-2">Sản phẩm đang được rao bán</h1>
+        <p class="text-secondary mb-0">Khám phá những bài đăng mới từ cộng đồng.</p>
+      </div>
+      <a class="btn btn-primary" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
+        Đăng tin
+      </a>
+    </div>
+
+    <% if (listings.length > 0) { %>
+      <div class="row g-4">
+        <% listings.forEach((listing) => { %>
+          <div class="col-sm-6 col-lg-4 col-xl-3">
+            <%- include('_card', { listing }) %>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info" role="status">
+        Hiện chưa có sản phẩm nào đang được rao bán.
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

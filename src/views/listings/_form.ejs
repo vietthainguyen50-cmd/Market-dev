@@ -1,0 +1,122 @@
+<form action="<%= formAction %>" method="POST">
+  <div class="mb-3">
+    <label class="form-label fw-semibold" for="title">Tiêu đề</label>
+    <input
+      class="form-control<%= errors.title ? ' is-invalid' : '' %>"
+      id="title"
+      name="title"
+      type="text"
+      value="<%= oldInput.title %>"
+      minlength="5"
+      maxlength="150"
+      required
+    >
+    <% if (errors.title) { %>
+      <div class="invalid-feedback"><%= errors.title %></div>
+    <% } %>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold" for="description">Mô tả</label>
+    <textarea
+      class="form-control<%= errors.description ? ' is-invalid' : '' %>"
+      id="description"
+      name="description"
+      rows="7"
+      minlength="20"
+      maxlength="3000"
+      required
+    ><%= oldInput.description %></textarea>
+    <% if (errors.description) { %>
+      <div class="invalid-feedback"><%= errors.description %></div>
+    <% } %>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label fw-semibold" for="price">Giá bán (VND)</label>
+      <input
+        class="form-control<%= errors.price ? ' is-invalid' : '' %>"
+        id="price"
+        name="price"
+        type="number"
+        value="<%= oldInput.price %>"
+        min="0"
+        max="100000000000"
+        step="1"
+        required
+      >
+      <% if (errors.price) { %>
+        <div class="invalid-feedback"><%= errors.price %></div>
+      <% } %>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label fw-semibold" for="category">Danh mục</label>
+      <select
+        class="form-select<%= errors.category ? ' is-invalid' : '' %>"
+        id="category"
+        name="category"
+        required
+      >
+        <option value="">Chọn danh mục</option>
+        <% categories.forEach((category) => { %>
+          <option
+            value="<%= category._id %>"
+            <%= oldInput.category === category._id.toString() ? 'selected' : '' %>
+            <%= category.status !== 'active' ? 'disabled' : '' %>
+          >
+            <%= category.name %><%= category.status !== 'active' ? ' (Không hoạt động)' : '' %>
+          </option>
+        <% }); %>
+      </select>
+      <% if (errors.category) { %>
+        <div class="invalid-feedback"><%= errors.category %></div>
+      <% } %>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label fw-semibold" for="location">Địa điểm</label>
+      <input
+        class="form-control<%= errors.location ? ' is-invalid' : '' %>"
+        id="location"
+        name="location"
+        type="text"
+        value="<%= oldInput.location %>"
+        minlength="2"
+        maxlength="150"
+        required
+      >
+      <% if (errors.location) { %>
+        <div class="invalid-feedback"><%= errors.location %></div>
+      <% } %>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label fw-semibold" for="condition">Tình trạng</label>
+      <select
+        class="form-select<%= errors.condition ? ' is-invalid' : '' %>"
+        id="condition"
+        name="condition"
+        required
+      >
+        <option value="used"<%= oldInput.condition === 'used' ? ' selected' : '' %>>Đã sử dụng</option>
+        <option value="new"<%= oldInput.condition === 'new' ? ' selected' : '' %>>Mới</option>
+      </select>
+      <% if (errors.condition) { %>
+        <div class="invalid-feedback"><%= errors.condition %></div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-4" role="status">
+    Chức năng upload ảnh sẽ được bổ sung ở bước sau.
+  </div>
+
+  <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+    <button class="btn btn-primary px-4" type="submit" <%= canSubmit ? '' : 'disabled' %>>
+      <%= submitLabel %>
+    </button>
+    <a class="btn btn-outline-secondary px-4" href="<%= cancelUrl %>">Hủy</a>
+  </div>
+</form>

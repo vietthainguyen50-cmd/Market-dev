@@ -1,0 +1,76 @@
+<%- include('../partials/header') %>
+
+<section class="section-space">
+  <div class="container">
+    <a class="link-secondary d-inline-block mb-4" href="/listings">← Quay lại danh sách</a>
+
+    <% if (successMessage) { %>
+      <div class="alert alert-success" role="status"><%= successMessage %></div>
+    <% } %>
+
+    <% if (errors.general) { %>
+      <div class="alert alert-danger" role="alert"><%= errors.general %></div>
+    <% } %>
+
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <div class="listing-detail-placeholder" aria-hidden="true">
+          <span>NTT Marketplace</span>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="condition-badge"><%= listing.conditionLabel %></span>
+          <span class="badge <%= listing.status === 'active' ? 'text-bg-success' : listing.status === 'sold' ? 'text-bg-danger' : 'text-bg-secondary' %>">
+            <%= listing.statusLabel %>
+          </span>
+        </div>
+        <h1 class="display-6 fw-bold mb-3"><%= listing.title %></h1>
+        <p class="display-6 product-price mb-4"><%= listing.formattedPrice %></p>
+
+        <dl class="row listing-meta mb-4">
+          <dt class="col-sm-4">Danh mục</dt>
+          <dd class="col-sm-8">
+            <% if (listing.category) { %>
+              <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
+            <% } else { %>
+              Không còn tồn tại
+            <% } %>
+          </dd>
+          <dt class="col-sm-4">Địa điểm</dt>
+          <dd class="col-sm-8"><%= listing.location %></dd>
+          <dt class="col-sm-4">Ngày đăng</dt>
+          <dd class="col-sm-8"><%= listing.formattedCreatedAt %></dd>
+        </dl>
+
+        <div class="seller-card border rounded-4 p-3 mb-4">
+          <p class="small text-uppercase fw-bold text-secondary mb-2">Người bán</p>
+          <div class="d-flex align-items-center gap-3">
+            <% if (listing.seller && listing.sellerAvatar) { %>
+              <img class="seller-avatar" src="<%= listing.sellerAvatar %>" alt="Ảnh đại diện người bán">
+            <% } else { %>
+              <div class="seller-avatar-placeholder" aria-hidden="true">N</div>
+            <% } %>
+            <div>
+              <p class="fw-bold mb-0"><%= listing.seller ? listing.seller.name : 'Người dùng không còn tồn tại' %></p>
+              <% if (listing.seller && listing.seller.phone) { %>
+                <p class="text-secondary mb-0"><%= listing.seller.phone %></p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <% if (canManage) { %>
+          <%- include('_actions', { listing }) %>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="bg-white border rounded-4 p-4 p-md-5 mt-5">
+      <h2 class="h4 fw-bold mb-3">Mô tả sản phẩm</h2>
+      <p class="listing-description text-secondary mb-0"><%= listing.description %></p>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

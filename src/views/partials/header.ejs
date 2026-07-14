@@ -35,13 +35,16 @@
         <div class="collapse navbar-collapse" id="mainNavigation">
           <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             <li class="nav-item"><a class="nav-link" href="/categories">Danh mục</a></li>
-            <li class="nav-item"><a class="nav-link" href="/#products">Sản phẩm</a></li>
+            <li class="nav-item"><a class="nav-link" href="/listings">Sản phẩm</a></li>
             <% if (isAuthenticated) { %>
               <% if (currentUser.role === 'admin') { %>
                 <li class="nav-item">
                   <a class="nav-link" href="/admin/categories">Quản lý danh mục</a>
                 </li>
               <% } %>
+              <li class="nav-item">
+                <a class="nav-link" href="/my-listings">Bài đăng của tôi</a>
+              </li>
               <li class="nav-item">
                 <span class="navbar-text text-white">Xin chào, <%= currentUser.name %></span>
               </li>
@@ -57,7 +60,9 @@
               <li class="nav-item"><a class="nav-link" href="/register">Đăng ký</a></li>
             <% } %>
             <li class="nav-item">
-              <a class="btn btn-warning ms-lg-2 px-3" href="/#post-ad">Đăng tin</a>
+              <a class="btn btn-warning ms-lg-2 px-3" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
+                Đăng tin
+              </a>
             </li>
           </ul>
         </div>

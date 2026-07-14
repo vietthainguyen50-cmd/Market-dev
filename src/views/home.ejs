@@ -90,31 +90,21 @@
         <p class="section-kicker">Gợi ý cho bạn</p>
         <h2 class="fw-bold mb-0">Sản phẩm mới đăng</h2>
       </div>
-      <span class="text-secondary">Dữ liệu minh họa trong Bước 1</span>
+      <a class="link-primary fw-semibold" href="/listings">Xem tất cả sản phẩm</a>
     </div>
-    <div class="row g-4 mt-3">
-      <% products.forEach((product) => { %>
-        <div class="col-sm-6 col-xl-3">
-          <article class="card product-card h-100 border-0">
-            <div
-              class="product-placeholder <%= product.colorClass %>"
-              role="img"
-              aria-label="Ảnh minh họa <%= product.name %>"
-            >
-              <span><%= product.placeholder %></span>
-            </div>
-            <div class="card-body p-4">
-              <span class="condition-badge"><%= product.condition %></span>
-              <h3 class="h5 fw-bold mt-3 mb-2"><%= product.name %></h3>
-              <p class="product-price mb-2"><%= product.formattedPrice %></p>
-              <p class="small text-secondary mb-0">
-                <span aria-hidden="true">📍</span> <%= product.location %>
-              </p>
-            </div>
-          </article>
-        </div>
-      <% }); %>
-    </div>
+    <% if (listings.length > 0) { %>
+      <div class="row g-4 mt-3">
+        <% listings.forEach((listing) => { %>
+          <div class="col-sm-6 col-xl-3">
+            <%- include('listings/_card', { listing }) %>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info mt-4 mb-0" role="status">
+        Hiện chưa có sản phẩm nào đang được rao bán.
+      </div>
+    <% } %>
   </div>
 </section>
 
@@ -123,9 +113,11 @@
     <div>
       <p class="text-uppercase fw-bold small mb-2">Bạn có món đồ không còn dùng?</p>
       <h2 class="h3 fw-bold mb-2">Đăng tin và tìm người cần nó.</h2>
-      <p class="mb-0 opacity-75">Tính năng đăng tin sẽ được hoàn thiện trong các bước tiếp theo.</p>
+      <p class="mb-0 opacity-75">Tạo bài đăng để kết nối với người mua trong cộng đồng.</p>
     </div>
-    <a class="btn btn-light btn-lg px-4 disabled" href="#" aria-disabled="true">Đăng tin ngay</a>
+    <a class="btn btn-light btn-lg px-4" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
+      Đăng tin ngay
+    </a>
   </div>
 </section>
 

@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator');
 
 const categoryService = require('../services/category.service');
+const listingService = require('../services/listing.service');
+const presentListing = require('../utils/presentListing');
 
 const CREATED_MESSAGE = 'Tạo danh mục thành công.';
 const UPDATED_MESSAGE = 'Cập nhật danh mục thành công.';
@@ -96,9 +98,12 @@ const showCategory = async (req, res, next) => {
       return renderNotFound(req, res);
     }
 
+    const listings = await listingService.getListingsByCategory(category);
+
     return res.render('categories/show', {
       pageTitle: category.name,
       category,
+      listings: listings.map(presentListing),
     });
   } catch (error) {
     return next(error);

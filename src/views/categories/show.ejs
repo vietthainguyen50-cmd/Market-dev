@@ -31,9 +31,21 @@
       </div>
     </div>
 
-    <div class="bg-white border rounded-4 p-4 p-md-5 mt-5 text-center">
-      <h2 class="h4 fw-bold mb-2">Sản phẩm trong danh mục</h2>
-      <p class="text-secondary mb-0">Hiện chưa có sản phẩm nào trong danh mục này.</p>
+    <div class="mt-5">
+      <h2 class="h4 fw-bold mb-4">Sản phẩm trong danh mục</h2>
+      <% if (listings.length > 0) { %>
+        <div class="row g-4">
+          <% listings.forEach((listing) => { %>
+            <div class="col-sm-6 col-lg-4 col-xl-3">
+              <%- include('../listings/_card', { listing }) %>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="bg-white border rounded-4 p-4 p-md-5 text-center">
+          <p class="text-secondary mb-0">Hiện chưa có sản phẩm nào trong danh mục này.</p>
+        </div>
+      <% } %>
     </div>
   </div>
 </section>

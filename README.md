@@ -1,6 +1,6 @@
 # NTT Marketplace
 
-NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB, đăng xuất và quản lý danh mục; trang chủ lấy danh mục từ MongoDB nhưng vẫn giữ sản phẩm tĩnh để minh họa giao diện.
+NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB, đăng xuất, quản lý danh mục và CRUD bài đăng; trang chủ và trang danh mục đều lấy sản phẩm thật từ MongoDB.
 
 ## Công nghệ đang sử dụng
 
@@ -210,7 +210,33 @@ Seed chỉ thêm những danh mục còn thiếu bằng `$setOnInsert`; không x
 3. Tìm đúng email test rồi chỉ đổi trường `role` của document đó từ `user` thành `admin`.
 4. Đăng xuất và đăng nhập lại trước khi mở `/admin/categories`.
 
-Không lưu email/mật khẩu admin trong source code và không cập nhật hàng loạt user. Bước 5 chưa có model Listing/sản phẩm và chưa có upload ảnh; trường `image` chỉ nhận URL hoặc đường dẫn static đã tồn tại. CSRF protection vẫn chưa được triển khai.
+Không lưu email/mật khẩu admin trong source code và không cập nhật hàng loạt user. Trường `image` của Category chỉ nhận URL hoặc đường dẫn static đã tồn tại. CSRF protection vẫn chưa được triển khai.
+
+## Bài đăng sản phẩm
+
+Bước 6 đã hoàn thành Listing CRUD theo quyền sở hữu. Model `Listing` lưu `title`, `description`, `price` dạng Number, `category` tham chiếu `Category`, `seller` tham chiếu `User`, `location`, `condition`, `images`, `status` và timestamps. `condition` chỉ nhận `new` hoặc `used`; `status` chỉ nhận `active`, `sold` hoặc `hidden`. Trong bước này `images` luôn là mảng rỗng vì chưa hỗ trợ upload ảnh.
+
+Route công khai:
+
+- `GET /listings`
+- `GET /listings/:id`
+
+Route yêu cầu đăng nhập:
+
+- `GET /listings/create`
+- `POST /listings`
+- `GET /my-listings`
+
+Route chỉ owner hoặc admin được sử dụng:
+
+- `GET /listings/:id/edit`
+- `PUT /listings/:id`
+- `PATCH /listings/:id/status`
+- `DELETE /listings/:id`
+
+Seller luôn được lấy từ user trong session, không nhận từ form. Route `DELETE` là soft delete: document không bị xóa mà chỉ chuyển sang `hidden`. Listing `active` hiển thị công khai và ở khu vực sản phẩm mới; listing `sold` vẫn công khai với nhãn “Đã bán” nhưng không xuất hiện ở sản phẩm mới; listing `hidden` chỉ owner hoặc admin xem được. Trang chủ lấy tối đa 8 listing active mới nhất từ MongoDB, còn trang chi tiết category hiển thị listing active và sold thuộc đúng category.
+
+Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu thích hoặc chat. Không commit file `.env` hay đưa thông tin kết nối, session secret vào source code.
 
 ## Cấu trúc cơ bản
 
@@ -223,28 +249,36 @@ Không lưu email/mật khẩu admin trong source code và không cập nhật h
 │   ├── controllers/
 │   │   ├── auth.controller.js
 │   │   ├── category.controller.js
-│   │   └── home.controller.js
+│   │   ├── home.controller.js
+│   │   └── listing.controller.js
 │   ├── middlewares/
 │   │   ├── admin.middleware.js
 │   │   ├── auth.middleware.js
 │   │   ├── error.middleware.js
+│   │   ├── listing.middleware.js
 │   │   └── notFound.middleware.js
 │   ├── models/
 │   │   ├── Category.js
+│   │   ├── Listing.js
 │   │   └── User.js
 │   ├── routes/
 │   │   ├── adminCategory.routes.js
 │   │   ├── auth.routes.js
 │   │   ├── category.routes.js
-│   │   └── home.routes.js
+│   │   ├── home.routes.js
+│   │   └── listing.routes.js
 │   ├── services/
 │   │   ├── auth.service.js
-│   │   └── category.service.js
+│   │   ├── category.service.js
+│   │   └── listing.service.js
 │   ├── utils/
-│   │   └── createSlug.js
+│   │   ├── createSlug.js
+│   │   ├── formatPrice.js
+│   │   └── presentListing.js
 │   ├── validators/
 │   │   ├── auth.validator.js
-│   │   └── category.validator.js
+│   │   ├── category.validator.js
+│   │   └── listing.validator.js
 │   ├── views/
 │   │   ├── admin/categories/
 │   │   ├── auth/
@@ -253,6 +287,7 @@ Không lưu email/mật khẩu admin trong source code và không cập nhật h
 │   │   ├── categories/
 │   │   ├── errors/
 │   │   ├── layouts/
+│   │   ├── listings/
 │   │   ├── partials/
 │   │   └── home.ejs
 │   ├── public/
@@ -270,6 +305,4 @@ Không lưu email/mật khẩu admin trong source code và không cập nhật h
 
 ## Trạng thái dự án
 
-Bước 5 đã hoàn thành model, seed, trang công khai và quản lý danh mục theo quyền admin, đồng thời giữ nguyên đăng ký, đăng nhập, session và đăng xuất của các bước trước. Dự án chưa có model Listing/sản phẩm, upload ảnh, JWT, trang cá nhân, admin dashboard hoàn chỉnh, yêu thích hoặc chat.
-#   M a r k e t - d e v  
- 
+Bước 6 đã hoàn thành model, validation, service, controller, route và giao diện CRUD Listing theo quyền owner/admin; đồng thời tích hợp sản phẩm thật vào trang chủ và trang category, giữ nguyên đăng ký, đăng nhập, session, đăng xuất và quản lý danh mục. Dự án chưa có upload ảnh, tìm kiếm, lọc, phân trang, JWT, trang cá nhân đầy đủ, admin dashboard hoàn chỉnh, yêu thích hoặc chat.
