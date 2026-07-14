@@ -1,0 +1,110 @@
+<%- include('partials/header') %>
+
+<section class="hero-section">
+  <div class="container py-5">
+    <div class="row align-items-center gy-5 py-lg-5">
+      <div class="col-lg-7">
+        <span class="eyebrow">Mua bán đơn giản · Kết nối nhanh chóng</span>
+        <h1 class="display-4 fw-bold mt-3 mb-4">
+          Trao món đồ cũ,<br>
+          <span class="text-accent">mở câu chuyện mới.</span>
+        </h1>
+        <p class="lead text-secondary mb-4 hero-copy">
+          NTT Marketplace giúp bạn khám phá, mua bán và đăng tin sản phẩm đã qua sử dụng
+          một cách thuận tiện ngay trong khu vực của mình.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a class="btn btn-primary btn-lg px-4" href="#products">Khám phá sản phẩm</a>
+          <a class="btn btn-outline-dark btn-lg px-4" href="#post-ad">Đăng tin</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-card shadow-lg">
+          <div class="hero-card-top d-flex justify-content-between align-items-center">
+            <span class="badge rounded-pill text-bg-light">Tin mới hôm nay</span>
+            <span class="status-dot" aria-label="Đang hoạt động"></span>
+          </div>
+          <div class="hero-illustration" role="img" aria-label="Minh họa khu mua bán sản phẩm cũ">
+            <span class="hero-icon">♻️</span>
+          </div>
+          <div class="p-4">
+            <p class="small text-uppercase fw-bold text-primary mb-2">Lựa chọn thông minh</p>
+            <h2 class="h4 fw-bold mb-2">Tiết kiệm hơn, bền vững hơn</h2>
+            <p class="text-secondary mb-0">Tìm món đồ phù hợp từ cộng đồng người bán gần bạn.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-space bg-white" id="categories">
+  <div class="container">
+    <div class="section-heading d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2">
+      <div>
+        <p class="section-kicker">Danh mục nổi bật</p>
+        <h2 class="fw-bold mb-0">Bạn đang tìm gì?</h2>
+      </div>
+      <p class="text-secondary mb-0">Khám phá những nhóm sản phẩm được quan tâm.</p>
+    </div>
+    <div class="row g-4 mt-3">
+      <% categories.forEach((category) => { %>
+        <div class="col-6 col-lg-3">
+          <article class="category-card h-100">
+            <span class="category-icon" aria-hidden="true"><%= category.icon %></span>
+            <h3 class="h5 fw-bold mt-3 mb-1"><%= category.name %></h3>
+            <p class="small text-secondary mb-0"><%= category.description %></p>
+          </article>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="section-space products-section" id="products">
+  <div class="container">
+    <div class="section-heading d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2">
+      <div>
+        <p class="section-kicker">Gợi ý cho bạn</p>
+        <h2 class="fw-bold mb-0">Sản phẩm mới đăng</h2>
+      </div>
+      <span class="text-secondary">Dữ liệu minh họa trong Bước 1</span>
+    </div>
+    <div class="row g-4 mt-3">
+      <% products.forEach((product) => { %>
+        <div class="col-sm-6 col-xl-3">
+          <article class="card product-card h-100 border-0">
+            <div
+              class="product-placeholder <%= product.colorClass %>"
+              role="img"
+              aria-label="Ảnh minh họa <%= product.name %>"
+            >
+              <span><%= product.placeholder %></span>
+            </div>
+            <div class="card-body p-4">
+              <span class="condition-badge"><%= product.condition %></span>
+              <h3 class="h5 fw-bold mt-3 mb-2"><%= product.name %></h3>
+              <p class="product-price mb-2"><%= product.formattedPrice %></p>
+              <p class="small text-secondary mb-0">
+                <span aria-hidden="true">📍</span> <%= product.location %>
+              </p>
+            </div>
+          </article>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="container pb-5" id="post-ad">
+  <div class="post-ad-banner p-4 p-lg-5 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
+    <div>
+      <p class="text-uppercase fw-bold small mb-2">Bạn có món đồ không còn dùng?</p>
+      <h2 class="h3 fw-bold mb-2">Đăng tin và tìm người cần nó.</h2>
+      <p class="mb-0 opacity-75">Tính năng đăng tin sẽ được hoàn thiện trong các bước tiếp theo.</p>
+    </div>
+    <a class="btn btn-light btn-lg px-4 disabled" href="#" aria-disabled="true">Đăng tin ngay</a>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

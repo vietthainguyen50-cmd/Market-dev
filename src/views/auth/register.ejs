@@ -1,0 +1,106 @@
+<%- include('../partials/header') %>
+
+<section class="auth-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-6 col-xl-5">
+        <div class="auth-panel bg-white border shadow-sm p-4 p-md-5">
+          <h1 class="h2 fw-bold mb-2">Đăng ký tài khoản</h1>
+          <p class="text-secondary mb-4">
+            Tạo tài khoản NTT Marketplace để sẵn sàng mua bán cùng cộng đồng.
+          </p>
+
+          <% if (successMessage) { %>
+            <div class="alert alert-success" role="status"><%= successMessage %></div>
+          <% } %>
+
+          <% if (errors.general) { %>
+            <div class="alert alert-danger" role="alert"><%= errors.general %></div>
+          <% } %>
+
+          <form action="/register" method="post">
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="name">Họ và tên</label>
+              <input
+                class="form-control<%= errors.name ? ' is-invalid' : '' %>"
+                id="name"
+                name="name"
+                type="text"
+                value="<%= oldInput.name || '' %>"
+                autocomplete="name"
+                minlength="2"
+                maxlength="100"
+                required
+              >
+              <% if (errors.name) { %>
+                <div class="invalid-feedback"><%= errors.name %></div>
+              <% } %>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="email">Email</label>
+              <input
+                class="form-control<%= errors.email ? ' is-invalid' : '' %>"
+                id="email"
+                name="email"
+                type="email"
+                value="<%= oldInput.email || '' %>"
+                autocomplete="email"
+                maxlength="254"
+                required
+              >
+              <% if (errors.email) { %>
+                <div class="invalid-feedback"><%= errors.email %></div>
+              <% } %>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="password">Mật khẩu</label>
+              <input
+                class="form-control<%= errors.password ? ' is-invalid' : '' %>"
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="72"
+                required
+              >
+              <% if (errors.password) { %>
+                <div class="invalid-feedback"><%= errors.password %></div>
+              <% } %>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="confirmPassword">Xác nhận mật khẩu</label>
+              <input
+                class="form-control<%= errors.confirmPassword ? ' is-invalid' : '' %>"
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="72"
+                required
+              >
+              <% if (errors.confirmPassword) { %>
+                <div class="invalid-feedback"><%= errors.confirmPassword %></div>
+              <% } %>
+            </div>
+
+            <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Đăng ký</button>
+          </form>
+
+          <p class="text-center text-secondary mt-4 mb-2">
+            Đã có tài khoản? <a href="/login">Đăng nhập</a>
+          </p>
+          <div class="text-center">
+            <a class="link-secondary" href="/">Quay về trang chủ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

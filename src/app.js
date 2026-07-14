@@ -1,0 +1,61 @@
+const path = require('path');
+const express = require('express');
+const helmet = require('helmet');
+const methodOverride = require('method-override');
+const morgan = require('morgan');
+
+const { createSessionMiddleware } = require('./config/session');
+const authRoutes = require('./routes/auth.routes');
+const homeRoutes = require('./routes/home.routes');
+const { loadCurrentUser } = require('./middlewares/auth.middleware');
+const notFoundMiddleware = require('./middlewares/notFound.middleware');
+const errorMiddleware = require('./middlewares/error.middleware');
+
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.locals.siteName = 'NTT Marketplace';
+app.locals.currentYear = new Date().getFullYear();
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride('_method'));
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+        scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+        fontSrc: ["'self'", 'https://cdn.jsdelivr.net', 'data:'],
+        imgSrc: ["'self'", 'data:'],
+        upgradeInsecureRequests: null,
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+app.use(createSessionMiddleware());
+app.use(loadCurrentUser);
+
+app.use('/', authRoutes);
+app.use('/', homeRoutes);
+
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
+
+module.exports = app;
