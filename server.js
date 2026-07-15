@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 
-const app = require('./src/app');
 const connectDatabase = require('./src/config/database');
 
 const PORT = process.env.PORT || 3000;
@@ -72,6 +71,10 @@ const handleServerError = async (error) => {
 const startServer = async () => {
   try {
     await connectDatabase();
+
+    // Khởi tạo app sau khi cấu hình DNS và kết nối MongoDB thành công.
+    // Việc này ngăn connect-mongo tra cứu SRV bằng DNS mặc định quá sớm.
+    const app = require('./src/app');
 
     server = app.listen(PORT, () => {
       console.log(`NTT Marketplace đang chạy tại http://localhost:${PORT}`);
