@@ -5,13 +5,130 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
       <div>
         <p class="section-kicker">Marketplace</p>
-        <h1 class="fw-bold mb-2">Sản phẩm đang được rao bán</h1>
-        <p class="text-secondary mb-0">Khám phá những bài đăng mới từ cộng đồng.</p>
+        <h1 class="fw-bold mb-2">Tìm kiếm sản phẩm</h1>
+        <p class="text-secondary mb-0">Tìm món đồ phù hợp từ các bài đăng trong cộng đồng.</p>
       </div>
       <a class="btn btn-primary" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
         Đăng tin
       </a>
     </div>
+
+    <form class="listing-filter-panel bg-white border rounded-4 p-4 mb-4" method="GET" action="/listings">
+      <% if (Object.keys(filterErrors).length > 0) { %>
+        <div class="alert alert-danger" role="alert">
+          <p class="fw-semibold mb-2">Vui lòng kiểm tra lại bộ lọc:</p>
+          <ul class="mb-0">
+            <% [...new Set(Object.values(filterErrors))].forEach((message) => { %>
+              <li><%= message %></li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-6">
+          <label class="form-label fw-semibold" for="keyword">Từ khóa</label>
+          <input
+            class="form-control <%= filterErrors.keyword ? 'is-invalid' : '' %>"
+            id="keyword"
+            name="keyword"
+            type="text"
+            maxlength="100"
+            value="<%= filters.keyword %>"
+            placeholder="Tìm theo tên hoặc mô tả sản phẩm"
+          >
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-semibold" for="category">Danh mục</label>
+          <select class="form-select <%= filterErrors.category ? 'is-invalid' : '' %>" id="category" name="category">
+            <option value="">Tất cả danh mục</option>
+            <% categories.forEach((category) => { %>
+              <option value="<%= category.slug %>" <%= filters.category === category.slug ? 'selected' : '' %>>
+                <%= category.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-semibold" for="condition">Tình trạng</label>
+          <select class="form-select <%= filterErrors.condition ? 'is-invalid' : '' %>" id="condition" name="condition">
+            <option value="">Tất cả tình trạng</option>
+            <option value="new" <%= filters.condition === 'new' ? 'selected' : '' %>>Mới</option>
+            <option value="used" <%= filters.condition === 'used' ? 'selected' : '' %>>Đã sử dụng</option>
+          </select>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="minPrice">Giá tối thiểu</label>
+          <input
+            class="form-control <%= filterErrors.minPrice || filterErrors.maxPrice ? 'is-invalid' : '' %>"
+            id="minPrice"
+            name="minPrice"
+            type="number"
+            min="0"
+            max="100000000000"
+            step="1"
+            value="<%= filters.minPrice === null ? '' : filters.minPrice %>"
+          >
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="maxPrice">Giá tối đa</label>
+          <input
+            class="form-control <%= filterErrors.maxPrice ? 'is-invalid' : '' %>"
+            id="maxPrice"
+            name="maxPrice"
+            type="number"
+            min="0"
+            max="100000000000"
+            step="1"
+            value="<%= filters.maxPrice === null ? '' : filters.maxPrice %>"
+          >
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-semibold" for="location">Địa điểm</label>
+          <input
+            class="form-control <%= filterErrors.location ? 'is-invalid' : '' %>"
+            id="location"
+            name="location"
+            type="text"
+            maxlength="150"
+            value="<%= filters.location %>"
+            placeholder="Khu vực, tỉnh hoặc thành phố"
+          >
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-semibold" for="status">Trạng thái</label>
+          <select class="form-select <%= filterErrors.status ? 'is-invalid' : '' %>" id="status" name="status">
+            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Tất cả bài đăng</option>
+            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Đang bán</option>
+            <option value="sold" <%= filters.status === 'sold' ? 'selected' : '' %>>Đã bán</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label fw-semibold" for="sort">Sắp xếp</label>
+          <select class="form-select <%= filterErrors.sort ? 'is-invalid' : '' %>" id="sort" name="sort">
+            <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Mới nhất</option>
+            <option value="oldest" <%= filters.sort === 'oldest' ? 'selected' : '' %>>Cũ nhất</option>
+            <option value="price-asc" <%= filters.sort === 'price-asc' ? 'selected' : '' %>>Giá tăng dần</option>
+            <option value="price-desc" <%= filters.sort === 'price-desc' ? 'selected' : '' %>>Giá giảm dần</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end gap-2">
+          <button class="btn btn-primary flex-grow-1" type="submit">Tìm kiếm</button>
+          <a class="btn btn-outline-secondary" href="/listings">Xóa bộ lọc</a>
+        </div>
+      </div>
+    </form>
+
+    <% if (Object.keys(filterErrors).length === 0) { %>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <p class="fw-semibold mb-0" data-total-items="<%= totalItems %>">
+          Tìm thấy <%= totalItems %> sản phẩm
+        </p>
+        <% if (pagination.totalPages > 1) { %>
+          <p class="small text-secondary mb-0">Trang <%= pagination.page %> / <%= pagination.totalPages %></p>
+        <% } %>
+      </div>
+    <% } %>
 
     <% if (listings.length > 0) { %>
       <div class="row g-4">
@@ -21,9 +138,13 @@
           </div>
         <% }); %>
       </div>
-    <% } else { %>
-      <div class="alert alert-info" role="status">
-        Hiện chưa có sản phẩm nào đang được rao bán.
+
+      <%- include('_pagination', { pagination }) %>
+    <% } else if (Object.keys(filterErrors).length === 0) { %>
+      <div class="listing-empty-state border rounded-4 p-4 p-md-5 text-center" role="status">
+        <h2 class="h4 fw-bold">Không tìm thấy sản phẩm phù hợp với bộ lọc hiện tại.</h2>
+        <p class="text-secondary">Hãy thử điều chỉnh từ khóa hoặc xóa bộ lọc để xem tất cả bài đăng.</p>
+        <a class="btn btn-outline-primary" href="/listings">Xóa bộ lọc</a>
       </div>
     <% } %>
   </div>

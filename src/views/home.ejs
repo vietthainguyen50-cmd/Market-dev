@@ -13,6 +13,20 @@
           NTT Marketplace giúp bạn khám phá, mua bán và đăng tin sản phẩm đã qua sử dụng
           một cách thuận tiện ngay trong khu vực của mình.
         </p>
+        <form class="hero-search mb-4" method="GET" action="/listings">
+          <label class="visually-hidden" for="homeKeyword">Từ khóa sản phẩm</label>
+          <div class="input-group input-group-lg">
+            <input
+              class="form-control"
+              id="homeKeyword"
+              name="keyword"
+              type="search"
+              maxlength="100"
+              placeholder="Tìm theo tên hoặc mô tả sản phẩm"
+            >
+            <button class="btn btn-primary px-4" type="submit">Tìm kiếm</button>
+          </div>
+        </form>
         <div class="d-flex flex-wrap gap-3">
           <a class="btn btn-primary btn-lg px-4" href="#products">Khám phá sản phẩm</a>
           <a class="btn btn-outline-dark btn-lg px-4" href="#post-ad">Đăng tin</a>

@@ -1,0 +1,45 @@
+<% if (pagination.totalPages > 1) { %>
+  <nav class="mt-5" aria-label="Phân trang sản phẩm">
+    <ul class="pagination justify-content-center flex-wrap">
+      <li class="page-item <%= pagination.firstUrl ? '' : 'disabled' %>">
+        <% if (pagination.firstUrl) { %>
+          <a class="page-link" href="<%= pagination.firstUrl %>">Trang đầu</a>
+        <% } else { %>
+          <span class="page-link" aria-disabled="true">Trang đầu</span>
+        <% } %>
+      </li>
+      <li class="page-item <%= pagination.previousUrl ? '' : 'disabled' %>">
+        <% if (pagination.previousUrl) { %>
+          <a class="page-link" href="<%= pagination.previousUrl %>">Trang trước</a>
+        <% } else { %>
+          <span class="page-link" aria-disabled="true">Trang trước</span>
+        <% } %>
+      </li>
+
+      <% pagination.pages.forEach((pageItem) => { %>
+        <li class="page-item <%= pageItem.isCurrent ? 'active' : '' %>">
+          <% if (pageItem.isCurrent) { %>
+            <span class="page-link" aria-current="page"><%= pageItem.number %></span>
+          <% } else { %>
+            <a class="page-link" href="<%= pageItem.url %>"><%= pageItem.number %></a>
+          <% } %>
+        </li>
+      <% }); %>
+
+      <li class="page-item <%= pagination.nextUrl ? '' : 'disabled' %>">
+        <% if (pagination.nextUrl) { %>
+          <a class="page-link" href="<%= pagination.nextUrl %>">Trang sau</a>
+        <% } else { %>
+          <span class="page-link" aria-disabled="true">Trang sau</span>
+        <% } %>
+      </li>
+      <li class="page-item <%= pagination.lastUrl ? '' : 'disabled' %>">
+        <% if (pagination.lastUrl) { %>
+          <a class="page-link" href="<%= pagination.lastUrl %>">Trang cuối</a>
+        <% } else { %>
+          <span class="page-link" aria-disabled="true">Trang cuối</span>
+        <% } %>
+      </li>
+    </ul>
+  </nav>
+<% } %>

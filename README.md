@@ -1,6 +1,6 @@
 # NTT Marketplace
 
-NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB, đăng xuất, quản lý danh mục và CRUD bài đăng; trang chủ và trang danh mục đều lấy sản phẩm thật từ MongoDB.
+NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, được xây dựng theo kiến trúc MVC bằng Node.js, Express, EJS và MongoDB. Phiên bản hiện tại đã có đăng ký, đăng nhập, session lưu trong MongoDB, hồ sơ cá nhân, quản lý danh mục và CRUD bài đăng; trang chủ và trang danh mục đều lấy sản phẩm thật từ MongoDB.
 
 ## Công nghệ đang sử dụng
 
@@ -16,6 +16,7 @@ NTT Marketplace là đồ án website mua bán và đăng tin sản phẩm cũ, 
 - express-validator
 - express-session
 - connect-mongo
+- multer
 - slugify
 - Nodemon (development)
 - CommonJS
@@ -173,7 +174,7 @@ Các biến session bắt buộc hoặc được hỗ trợ:
 - `SESSION_COOKIE_NAME`: tên cookie, mặc định đề xuất là `ntt_marketplace_sid`.
 - `SESSION_MAX_AGE_MS`: thời gian sống cookie theo mili giây, giá trị mẫu `604800000` tương đương 7 ngày.
 
-CSRF protection chưa được triển khai trong Bước 4 và sẽ được bổ sung ở giai đoạn bảo mật sau. Phiên bản này cũng chưa có trang cá nhân, phân quyền/admin dashboard hoặc JWT.
+CSRF protection chưa được triển khai trong Bước 4 và sẽ được bổ sung ở giai đoạn bảo mật sau. Bước 4 chưa triển khai trang cá nhân, admin dashboard hoặc JWT; trang hồ sơ cá nhân được bổ sung riêng ở Bước 9.
 
 ## Danh mục sản phẩm
 
@@ -214,7 +215,7 @@ Không lưu email/mật khẩu admin trong source code và không cập nhật h
 
 ## Bài đăng sản phẩm
 
-Bước 6 đã hoàn thành Listing CRUD theo quyền sở hữu. Model `Listing` lưu `title`, `description`, `price` dạng Number, `category` tham chiếu `Category`, `seller` tham chiếu `User`, `location`, `condition`, `images`, `status` và timestamps. `condition` chỉ nhận `new` hoặc `used`; `status` chỉ nhận `active`, `sold` hoặc `hidden`. Trong bước này `images` luôn là mảng rỗng vì chưa hỗ trợ upload ảnh.
+Bước 6 đã hoàn thành Listing CRUD theo quyền sở hữu. Model `Listing` lưu `title`, `description`, `price` dạng Number, `category` tham chiếu `Category`, `seller` tham chiếu `User`, `location`, `condition`, `images`, `status` và timestamps. `condition` chỉ nhận `new` hoặc `used`; `status` chỉ nhận `active`, `sold` hoặc `hidden`.
 
 Route công khai:
 
@@ -236,7 +237,45 @@ Route chỉ owner hoặc admin được sử dụng:
 
 Seller luôn được lấy từ user trong session, không nhận từ form. Route `DELETE` là soft delete: document không bị xóa mà chỉ chuyển sang `hidden`. Listing `active` hiển thị công khai và ở khu vực sản phẩm mới; listing `sold` vẫn công khai với nhãn “Đã bán” nhưng không xuất hiện ở sản phẩm mới; listing `hidden` chỉ owner hoặc admin xem được. Trang chủ lấy tối đa 8 listing active mới nhất từ MongoDB, còn trang chi tiết category hiển thị listing active và sold thuộc đúng category.
 
-Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu thích hoặc chat. Không commit file `.env` hay đưa thông tin kết nối, session secret vào source code.
+Bước 6 chưa hỗ trợ tìm kiếm, lọc, phân trang, yêu thích hoặc chat. Không commit file `.env` hay đưa thông tin kết nối, session secret vào source code.
+
+## Upload ảnh sản phẩm
+
+Bước 7 đã bổ sung upload nhiều ảnh bằng Multer cho form tạo và sửa Listing. Hai form sử dụng `multipart/form-data`, field upload có tên `images` và ảnh là tùy chọn. Mỗi Listing được có từ 0 đến 5 ảnh; mỗi ảnh tối đa 5 MB. Định dạng được hỗ trợ là JPG, JPEG, PNG và WEBP. Ứng dụng không chấp nhận SVG, GIF, video, tài liệu hoặc file thực thi do người dùng upload.
+
+File được lưu local trong `uploads/listings/` với filename UUID do server tạo và phần mở rộng ánh xạ từ MIME type cho phép. Tên file gốc không được dùng làm tên lưu. MongoDB chỉ lưu public path dạng `/uploads/listings/<filename>`, không lưu Buffer, Base64 hoặc đường dẫn tuyệt đối. Thư mục `uploads/` nằm trong `.gitignore` nên ảnh người dùng không được commit lên Git.
+
+Khi sửa Listing, owner hoặc admin có thể giữ ảnh cũ, tải thêm ảnh và chọn xóa riêng từng ảnh hiện tại. Ảnh cũ được đối chiếu với chính Listing trước khi xóa; file mới được dọn nếu upload, validation, category hoặc cập nhật database thất bại. File cũ chỉ bị xóa sau khi MongoDB cập nhật thành công. Ảnh đầu tiên trong mảng là ảnh chính.
+
+Card sản phẩm và trang “Bài đăng của tôi” hiển thị ảnh chính. Trang chi tiết hiển thị gallery responsive. Listing cũ hoặc Listing mới không có ảnh sử dụng static placeholder `/images/listing-placeholder.svg`. Soft delete chỉ chuyển Listing sang `hidden` và không xóa ảnh, vì Listing vẫn có thể được owner xem hoặc kích hoạt lại.
+
+Lưu ảnh local phù hợp cho môi trường development. Khi triển khai production trên nhiều máy hoặc filesystem không bền vững, có thể chuyển lớp lưu trữ sang Cloudinary hoặc S3 ở bước sau. Phiên bản hiện tại chưa triển khai Cloudinary.
+
+## Tìm kiếm, lọc, sắp xếp và phân trang
+
+Bước 8 bổ sung tìm kiếm công khai tại `GET /listings` bằng query string. Route hỗ trợ đúng các tham số `keyword`, `category`, `condition`, `minPrice`, `maxPrice`, `location`, `status`, `sort` và `page`. Giá trị mặc định lần lượt là chuỗi rỗng cho các bộ lọc tùy chọn, `status=all`, `sort=newest` và `page=1`. Mỗi trang luôn lấy tối đa 12 Listing; client không được tự thay đổi `limit`.
+
+`keyword` tìm không phân biệt hoa thường trong `title` và `description`; `location` tìm chuỗi con không phân biệt hoa thường. Cả hai giá trị đều được giới hạn độ dài và escape ký tự regex trước khi tạo bộ lọc. Cách tìm bằng escaped regex phù hợp với phạm vi đồ án và lượng dữ liệu vừa phải; dự án chưa dùng MongoDB text index, Atlas Search, Elasticsearch hoặc dịch vụ tìm kiếm ngoài.
+
+Danh mục được nhận dưới dạng slug và chỉ được resolve sang ObjectId khi Category còn active. `condition`, `status` và `sort` dùng whitelist cố định; `hidden` không bao giờ là trạng thái public. Giá chỉ nhận số nguyên từ 0 đến 100.000.000.000 và giá tối thiểu không được lớn hơn giá tối đa. `page` chỉ nhận số nguyên từ 1 đến 10.000. Các field lạ, object, array và cú pháp MongoDB operator từ query đều bị từ chối; `req.query` không được truyền hoặc spread trực tiếp vào truy vấn MongoDB.
+
+Service dùng `countDocuments` song song với truy vấn `find`, đồng thời áp dụng `sort`, `skip` và `limit` ngay trong MongoDB. Phân trang giữ nguyên toàn bộ bộ lọc bằng `URLSearchParams`, hiển thị trang đầu/trước/các trang gần hiện tại/sau/cuối và chuyển về trang hợp lệ cuối cùng nếu người dùng yêu cầu trang vượt tổng kết quả. Trang chủ có form tìm nhanh gửi `GET /listings?keyword=...`; home controller vẫn chỉ tải danh mục active và 8 Listing active mới nhất như trước.
+
+## Hồ sơ cá nhân
+
+Bước 9 bổ sung trang hồ sơ riêng cho người dùng đã đăng nhập với các route:
+
+- `GET /profile`: hiển thị thông tin tài khoản, ngày tham gia, thống kê Listing và tối đa 4 Listing gần đây.
+- `GET /profile/edit`: hiển thị form chỉnh sửa hồ sơ.
+- `PUT /profile`: cập nhật hồ sơ và ảnh đại diện.
+
+Cả ba route đều dùng `requireAuth` và luôn lấy tài khoản từ `req.user._id`; route không nhận user ID từ URL hoặc form. Người dùng chỉ có thể cập nhật `name`, `phone`, `address` và `avatar`. Email, password, role và status không thể sửa trong bước này. Session tiếp tục chỉ lưu `userId`; tên và avatar mới được `loadCurrentUser` tải lại từ MongoDB ở request sau.
+
+Avatar được upload bằng Multer qua field `avatar`, chỉ nhận một file JPG/JPEG, PNG hoặc WEBP tối đa 2 MB. File được đặt tên bằng UUID do server tạo, lưu trong `uploads/avatars/`, còn MongoDB chỉ lưu public path `/uploads/avatars/<uuid>.<extension>`. Ứng dụng không nhận filename gốc, Base64, absolute path, SVG, GIF, PDF hoặc video. Khi chưa có avatar, giao diện dùng placeholder tĩnh `/images/default-avatar.svg`.
+
+Khi validation hoặc cập nhật database thất bại, avatar mới được dọn và avatar cũ được giữ nguyên. Avatar cũ chỉ bị xóa sau khi MongoDB cập nhật thành công, đồng thời utility chỉ cho phép xóa file thuộc đúng `uploads/avatars/`; ảnh Listing, placeholder và file ngoài thư mục này không bị tác động.
+
+Thống kê hồ sơ dùng `countDocuments` riêng cho `active`, `sold` và `hidden`, sau đó tính tổng từ ba giá trị. Listing gần đây được truy vấn theo đúng seller hiện tại, sắp xếp mới nhất và giới hạn 4. Bước này chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Favorite hoặc Chat.
 
 ## Cấu trúc cơ bản
 
@@ -250,12 +289,15 @@ Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu t
 │   │   ├── auth.controller.js
 │   │   ├── category.controller.js
 │   │   ├── home.controller.js
-│   │   └── listing.controller.js
+│   │   ├── listing.controller.js
+│   │   └── profile.controller.js
 │   ├── middlewares/
 │   │   ├── admin.middleware.js
+│   │   ├── avatar.middleware.js
 │   │   ├── auth.middleware.js
 │   │   ├── error.middleware.js
 │   │   ├── listing.middleware.js
+│   │   ├── upload.middleware.js
 │   │   └── notFound.middleware.js
 │   ├── models/
 │   │   ├── Category.js
@@ -266,19 +308,28 @@ Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu t
 │   │   ├── auth.routes.js
 │   │   ├── category.routes.js
 │   │   ├── home.routes.js
-│   │   └── listing.routes.js
+│   │   ├── listing.routes.js
+│   │   └── profile.routes.js
 │   ├── services/
 │   │   ├── auth.service.js
 │   │   ├── category.service.js
-│   │   └── listing.service.js
+│   │   ├── listing.service.js
+│   │   └── profile.service.js
 │   ├── utils/
+│   │   ├── avatarStorage.js
+│   │   ├── buildListingQuery.js
+│   │   ├── createPagination.js
 │   │   ├── createSlug.js
+│   │   ├── escapeRegex.js
+│   │   ├── fileStorage.js
 │   │   ├── formatPrice.js
+│   │   ├── normalizeListingQuery.js
 │   │   └── presentListing.js
 │   ├── validators/
 │   │   ├── auth.validator.js
 │   │   ├── category.validator.js
-│   │   └── listing.validator.js
+│   │   ├── listing.validator.js
+│   │   └── profile.validator.js
 │   ├── views/
 │   │   ├── admin/categories/
 │   │   ├── auth/
@@ -288,6 +339,10 @@ Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu t
 │   │   ├── errors/
 │   │   ├── layouts/
 │   │   ├── listings/
+│   │   │   └── _pagination.ejs
+│   │   ├── profile/
+│   │   │   ├── edit.ejs
+│   │   │   └── index.ejs
 │   │   ├── partials/
 │   │   └── home.ejs
 │   ├── public/
@@ -295,6 +350,9 @@ Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu t
 │   │   ├── images/
 │   │   └── js/
 │   └── app.js
+├── uploads/
+│   ├── avatars/
+│   └── listings/
 ├── scripts/
 │   └── seedCategories.js
 ├── .env.example
@@ -305,4 +363,4 @@ Bước 6 chưa hỗ trợ upload ảnh, tìm kiếm, lọc, phân trang, yêu t
 
 ## Trạng thái dự án
 
-Bước 6 đã hoàn thành model, validation, service, controller, route và giao diện CRUD Listing theo quyền owner/admin; đồng thời tích hợp sản phẩm thật vào trang chủ và trang category, giữ nguyên đăng ký, đăng nhập, session, đăng xuất và quản lý danh mục. Dự án chưa có upload ảnh, tìm kiếm, lọc, phân trang, JWT, trang cá nhân đầy đủ, admin dashboard hoàn chỉnh, yêu thích hoặc chat.
+Bước 9 đã hoàn thành hồ sơ cá nhân có bảo vệ đăng nhập, chỉnh sửa thông tin liên hệ, upload/thay/xóa avatar, placeholder, thống kê Listing và Listing gần đây. Dự án tiếp tục giữ nguyên auth, session, Category, Listing CRUD, upload ảnh, soft delete và tìm kiếm/phân trang. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Favorite, Chat hoặc thanh toán.

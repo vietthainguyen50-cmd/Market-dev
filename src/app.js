@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth.routes');
 const categoryRoutes = require('./routes/category.routes');
 const homeRoutes = require('./routes/home.routes');
 const listingRoutes = require('./routes/listing.routes');
+const profileRoutes = require('./routes/profile.routes');
 const { loadCurrentUser } = require('./middlewares/auth.middleware');
 const notFoundMiddleware = require('./middlewares/notFound.middleware');
 const errorMiddleware = require('./middlewares/error.middleware');
@@ -27,6 +28,13 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '..', 'uploads'), {
+    dotfiles: 'deny',
+    index: false,
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride('_method'));
@@ -56,6 +64,7 @@ app.use(createSessionMiddleware());
 app.use(loadCurrentUser);
 
 app.use('/', authRoutes);
+app.use('/', profileRoutes);
 app.use('/', listingRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/admin/categories', adminCategoryRoutes);

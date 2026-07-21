@@ -46,6 +46,16 @@
                 <a class="nav-link" href="/my-listings">Bài đăng của tôi</a>
               </li>
               <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="/profile">
+                  <img
+                    class="header-avatar"
+                    src="<%= currentUser.avatar || '/images/default-avatar.svg' %>"
+                    alt="Ảnh đại diện của <%= currentUser.name %>"
+                  >
+                  <span>Hồ sơ</span>
+                </a>
+              </li>
+              <li class="nav-item">
                 <span class="navbar-text text-white">Xin chào, <%= currentUser.name %></span>
               </li>
               <li class="nav-item">

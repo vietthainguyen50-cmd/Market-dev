@@ -24,6 +24,14 @@
         <% listings.forEach((listing) => { %>
           <div class="col-12 col-lg-6">
             <article class="bg-white border rounded-4 shadow-sm p-4 h-100">
+              <div class="listing-card-media rounded-3 mb-3">
+                <img
+                  class="listing-card-image"
+                  src="<%= listing.primaryImage %>"
+                  alt="Ảnh sản phẩm <%= listing.title %>"
+                  loading="lazy"
+                >
+              </div>
               <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
                 <span class="badge <%= listing.status === 'active' ? 'text-bg-success' : listing.status === 'sold' ? 'text-bg-danger' : 'text-bg-secondary' %>">
                   <%= listing.statusLabel %>

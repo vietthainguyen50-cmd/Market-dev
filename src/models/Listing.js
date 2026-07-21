@@ -53,6 +53,11 @@ const listingSchema = new mongoose.Schema(
     images: {
       type: [String],
       default: [],
+      validate: {
+        validator: (images) =>
+          Array.isArray(images) && images.length <= 5,
+        message: 'Một bài đăng chỉ được có tối đa 5 ảnh.',
+      },
     },
     status: {
       type: String,
@@ -69,6 +74,8 @@ const listingSchema = new mongoose.Schema(
 listingSchema.index({ createdAt: -1 });
 listingSchema.index({ category: 1, status: 1, createdAt: -1 });
 listingSchema.index({ seller: 1, createdAt: -1 });
+listingSchema.index({ status: 1, createdAt: -1 });
+listingSchema.index({ status: 1, condition: 1, price: 1 });
 
 module.exports =
   mongoose.models.Listing || mongoose.model('Listing', listingSchema);

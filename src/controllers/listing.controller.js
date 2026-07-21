@@ -2,12 +2,24 @@ const { validationResult } = require('express-validator');
 
 const categoryService = require('../services/category.service');
 const listingService = require('../services/listing.service');
+const { MAX_LISTING_IMAGES } = require('../middlewares/upload.middleware');
+const {
+  deleteStoredFiles,
+  normalizeRemoveImages,
+  uploadedFilesToPublicPaths,
+} = require('../utils/fileStorage');
+const {
+  buildListingUrl,
+  createPagination,
+} = require('../utils/createPagination');
+const normalizeListingQuery = require('../utils/normalizeListingQuery');
 const presentListing = require('../utils/presentListing');
 
 const CREATED_MESSAGE = 'Tạo bài đăng thành công.';
 const UPDATED_MESSAGE = 'Cập nhật bài đăng thành công.';
 const STATUS_CHANGED_MESSAGE = 'Thay đổi trạng thái bài đăng thành công.';
 const HIDDEN_MESSAGE = 'Bài đăng đã được ẩn.';
+const DEFAULT_AVATAR = '/images/default-avatar.svg';
 
 const getFieldErrors = (req) => {
   const mappedErrors = validationResult(req).mapped();
@@ -107,11 +119,27 @@ const getCategoriesForForm = async (currentCategory) => {
   return categories;
 };
 
+const getImageFormData = ({
+  existingImages = [],
+  selectedRemoveImages = [],
+  retryImages = false,
+} = {}) => ({
+  existingImages,
+  maxImages: MAX_LISTING_IMAGES,
+  remainingImageSlots: Math.max(
+    0,
+    MAX_LISTING_IMAGES - existingImages.length,
+  ),
+  retryImages,
+  selectedRemoveImages,
+});
+
 const renderListingDetail = (req, res, listing, options = {}) => {
   const isOwner = isListingOwner(listing, req.user);
   const canManage = canManageListing(listing, req.user);
   const presentedListing = presentListing(listing);
-  presentedListing.sellerAvatar = getSafeAvatar(listing.seller?.avatar);
+  presentedListing.sellerAvatar =
+    getSafeAvatar(listing.seller?.avatar) || DEFAULT_AVATAR;
 
   return res.status(options.statusCode || 200).render('listings/show', {
     pageTitle: listing.title,
@@ -138,13 +166,95 @@ const isCategoryError = (error) =>
   error.code === listingService.CATEGORY_NOT_FOUND ||
   error.code === listingService.CATEGORY_INACTIVE;
 
+const normalizeFilterErrors = (errors) => {
+  if (!errors._unknown_fields) {
+    return errors;
+  }
+
+  const { _unknown_fields: unknownFieldsError, ...fieldErrors } = errors;
+  return {
+    ...fieldErrors,
+    general: unknownFieldsError,
+  };
+};
+
+const getEmptyPagination = () => ({
+  page: 1,
+  limit: listingService.LISTINGS_PER_PAGE,
+  totalItems: 0,
+  totalPages: 1,
+  hasPrev: false,
+  hasNext: false,
+  previousPage: null,
+  nextPage: null,
+});
+
+const renderPublicListings = (res, options) => {
+  const pagination = createPagination(options.pagination, options.filters);
+
+  return res.status(options.statusCode || 200).render('listings/index', {
+    pageTitle: 'Tìm kiếm sản phẩm',
+    listings: options.listings || [],
+    categories: options.categories,
+    filters: options.filters,
+    filterErrors: options.filterErrors || {},
+    pagination,
+    totalItems: pagination.totalItems,
+  });
+};
+
 const listListings = async (req, res, next) => {
   try {
-    const listings = await listingService.getPublicListings();
+    const filters = normalizeListingQuery(req.query);
+    const categories = await categoryService.getActiveCategories();
+    const filterErrors = normalizeFilterErrors(getFieldErrors(req));
 
-    return res.render('listings/index', {
-      pageTitle: 'Sản phẩm đang được rao bán',
-      listings: listings.map(presentListing),
+    if (Object.keys(filterErrors).length > 0) {
+      return renderPublicListings(res, {
+        statusCode: 422,
+        listings: [],
+        categories,
+        filters,
+        filterErrors,
+        pagination: getEmptyPagination(),
+      });
+    }
+
+    const selectedCategory = filters.category
+      ? categories.find((category) => category.slug === filters.category)
+      : null;
+
+    if (filters.category && !selectedCategory) {
+      return renderPublicListings(res, {
+        statusCode: 422,
+        listings: [],
+        categories,
+        filters,
+        filterErrors: { category: 'Danh mục không hợp lệ.' },
+        pagination: getEmptyPagination(),
+      });
+    }
+
+    const result = await listingService.getPublicListings(
+      filters,
+      selectedCategory?._id,
+    );
+
+    if (
+      result.pagination.totalItems > 0 &&
+      filters.page > result.pagination.totalPages
+    ) {
+      return res.redirect(
+        302,
+        buildListingUrl(filters, result.pagination.totalPages),
+      );
+    }
+
+    return renderPublicListings(res, {
+      listings: result.items.map(presentListing),
+      categories,
+      filters,
+      pagination: result.pagination,
     });
   } catch (error) {
     return next(error);
@@ -181,6 +291,7 @@ const showCreateForm = async (req, res, next) => {
       canSubmit: categories.length > 0,
       errors: {},
       oldInput: getOldInput(),
+      ...getImageFormData(),
     });
   } catch (error) {
     return next(error);
@@ -188,19 +299,29 @@ const showCreateForm = async (req, res, next) => {
 };
 
 const createListing = async (req, res, next) => {
+  const newImagePaths = uploadedFilesToPublicPaths(req.files);
   const errors = getFieldErrors(req);
   const oldInput = getOldInput(req.body);
+  const retryImages =
+    newImagePaths.length > 0 || Boolean(req.uploadError);
+
+  if (req.uploadError) {
+    errors.images = req.uploadError.message;
+  }
 
   try {
     const categories = await getCategoriesForForm();
 
     if (Object.keys(errors).length > 0) {
+      await deleteStoredFiles(newImagePaths);
+
       return res.status(422).render('listings/create', {
         pageTitle: 'Đăng sản phẩm',
         categories,
         canSubmit: categories.length > 0,
         errors,
         oldInput,
+        ...getImageFormData({ retryImages }),
       });
     }
 
@@ -213,23 +334,28 @@ const createListing = async (req, res, next) => {
         location: req.body.location,
         condition: req.body.condition,
         seller: req.user._id,
+        images: newImagePaths,
       });
 
       return res.redirect(303, `/listings/${listing._id}?created=1`);
     } catch (error) {
       if (isCategoryError(error)) {
+        await deleteStoredFiles(newImagePaths);
+
         return res.status(422).render('listings/create', {
           pageTitle: 'Đăng sản phẩm',
           categories,
           canSubmit: categories.length > 0,
           errors: { category: error.message },
           oldInput,
+          ...getImageFormData({ retryImages }),
         });
       }
 
       throw error;
     }
   } catch (error) {
+    await deleteStoredFiles(newImagePaths);
     return next(error);
   }
 };
@@ -244,12 +370,17 @@ const showEditForm = async (req, res, next) => {
 
     const categories = await getCategoriesForForm(listing.category);
 
+    const presentedListing = presentListing(listing);
+
     return res.render('listings/edit', {
       pageTitle: 'Chỉnh sửa bài đăng',
-      listing,
+      listing: presentedListing,
       categories,
       errors: {},
       oldInput: getOldInput(listing),
+      ...getImageFormData({
+        existingImages: presentedListing.images,
+      }),
     });
   } catch (error) {
     return next(error);
@@ -257,24 +388,65 @@ const showEditForm = async (req, res, next) => {
 };
 
 const updateListing = async (req, res, next) => {
+  const newImagePaths = uploadedFilesToPublicPaths(req.files);
+  const existingImages = Array.isArray(req.listing.images)
+    ? req.listing.images.map(String)
+    : [];
+  const requestedRemoveImages = normalizeRemoveImages(
+    req.body.removeImages,
+  );
+  const invalidRemoveImages = requestedRemoveImages.filter(
+    (imagePath) => !existingImages.includes(imagePath),
+  );
+  const selectedRemoveImages = requestedRemoveImages.filter((imagePath) =>
+    existingImages.includes(imagePath),
+  );
+  const keptImages = existingImages.filter(
+    (imagePath) => !selectedRemoveImages.includes(imagePath),
+  );
+  const finalImages = [...keptImages, ...newImagePaths];
+  const retryImages =
+    newImagePaths.length > 0 || Boolean(req.uploadError);
+
   try {
     const listing = await listingService.getListingById(req.listing._id);
 
     if (!listing) {
+      await deleteStoredFiles(newImagePaths);
       return renderNotFound(req, res);
     }
 
     const categories = await getCategoriesForForm(listing.category);
     const errors = getFieldErrors(req);
     const oldInput = getOldInput(req.body);
+    const presentedListing = presentListing(listing);
+
+    if (req.uploadError) {
+      errors.images = req.uploadError.message;
+    }
+
+    if (invalidRemoveImages.length > 0) {
+      errors.images = 'Ảnh được chọn xóa không thuộc bài đăng này.';
+    }
+
+    if (finalImages.length > MAX_LISTING_IMAGES) {
+      errors.images = 'Một bài đăng chỉ được có tối đa 5 ảnh.';
+    }
 
     if (Object.keys(errors).length > 0) {
+      await deleteStoredFiles(newImagePaths);
+
       return res.status(422).render('listings/edit', {
         pageTitle: 'Chỉnh sửa bài đăng',
-        listing,
+        listing: presentedListing,
         categories,
         errors,
         oldInput,
+        ...getImageFormData({
+          existingImages: presentedListing.images,
+          selectedRemoveImages,
+          retryImages,
+        }),
       });
     }
 
@@ -286,27 +458,38 @@ const updateListing = async (req, res, next) => {
         category: req.body.category,
         location: req.body.location,
         condition: req.body.condition,
+        images: finalImages,
       });
 
+      await deleteStoredFiles(selectedRemoveImages);
       return res.redirect(303, `/listings/${req.listing._id}?updated=1`);
     } catch (error) {
       if (isCategoryError(error)) {
+        await deleteStoredFiles(newImagePaths);
+
         return res.status(422).render('listings/edit', {
           pageTitle: 'Chỉnh sửa bài đăng',
-          listing,
+          listing: presentedListing,
           categories,
           errors: { category: error.message },
           oldInput,
+          ...getImageFormData({
+            existingImages: presentedListing.images,
+            selectedRemoveImages,
+            retryImages,
+          }),
         });
       }
 
       if (error.code === listingService.LISTING_NOT_FOUND) {
+        await deleteStoredFiles(newImagePaths);
         return renderNotFound(req, res);
       }
 
       throw error;
     }
   } catch (error) {
+    await deleteStoredFiles(newImagePaths);
     return next(error);
   }
 };

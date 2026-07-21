@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+      maxlength: [20, 'Số điện thoại không được vượt quá 20 ký tự.'],
     },
     avatar: {
       type: String,
@@ -41,6 +42,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+      maxlength: [200, 'Địa chỉ không được vượt quá 200 ký tự.'],
     },
     role: {
       type: String,

@@ -26,6 +26,15 @@ body {
   box-shadow: 0 0.5rem 1.5rem rgba(18, 62, 140, 0.18);
 }
 
+.header-avatar {
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+}
+
 .brand-mark {
   display: inline-grid;
   width: 2rem;
@@ -59,6 +68,14 @@ body {
 
 .hero-copy {
   max-width: 42rem;
+}
+
+.hero-search {
+  max-width: 42rem;
+}
+
+.hero-search .form-control {
+  border-color: #cbd5e1;
 }
 
 .hero-card {
@@ -182,6 +199,14 @@ body {
   background: var(--surface);
 }
 
+.listing-filter-panel {
+  box-shadow: 0 0.5rem 1.5rem rgba(16, 24, 40, 0.05);
+}
+
+.listing-empty-state {
+  background: #ffffff;
+}
+
 .product-card {
   overflow: hidden;
   border-radius: 1.15rem;
@@ -205,15 +230,16 @@ body {
   text-transform: uppercase;
 }
 
-.listing-placeholder {
-  display: grid;
-  min-height: 12rem;
-  place-items: center;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-  font-size: 1.35rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+.listing-card-media {
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #e9eef7;
+}
+
+.listing-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .listing-status-overlay {
@@ -222,15 +248,45 @@ body {
   right: 1rem;
 }
 
-.listing-detail-placeholder {
-  display: grid;
-  min-height: 28rem;
-  place-items: center;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+.listing-gallery-main,
+.listing-gallery-thumbnail,
+.listing-edit-thumbnail {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  background: #e9eef7;
+}
+
+.listing-gallery-main {
+  min-height: 24rem;
+  max-height: 36rem;
+  aspect-ratio: 4 / 3;
   border-radius: 1.5rem;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: 900;
+}
+
+.listing-gallery-thumbnail {
+  aspect-ratio: 4 / 3;
+  border-radius: 1rem;
+}
+
+.listing-edit-thumbnail {
+  aspect-ratio: 4 / 3;
+  border-radius: 0.75rem;
+}
+
+.listing-image-remove-card {
+  display: block;
+  height: 100%;
+  padding: 0.75rem;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 1rem;
+}
+
+.listing-image-remove-card:has(.form-check-input:checked) {
+  border-color: #d92d20;
+  box-shadow: 0 0 0 0.2rem rgba(217, 45, 32, 0.1);
 }
 
 .listing-description {
@@ -336,6 +392,53 @@ body {
   min-height: 3rem;
 }
 
+.profile-hero,
+.profile-edit-panel,
+.profile-stat-card {
+  border-color: #e4e7ec !important;
+}
+
+.profile-avatar,
+.profile-avatar-preview {
+  display: block;
+  object-fit: cover;
+  background: #eaf2ff;
+  border: 0.35rem solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0.5rem 1.5rem rgba(16, 24, 40, 0.12);
+}
+
+.profile-avatar {
+  width: 8rem;
+  height: 8rem;
+}
+
+.profile-avatar-preview {
+  width: 10rem;
+  height: 10rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.profile-details dt {
+  color: var(--muted);
+}
+
+.profile-stat-card {
+  box-shadow: 0 0.35rem 1rem rgba(16, 24, 40, 0.04);
+}
+
+.profile-avatar-panel {
+  background: #f8fafc;
+}
+
+.profile-remove-avatar {
+  padding: 0.8rem 0.8rem 0.8rem 2.4rem;
+  background: #fff4ed;
+  border: 1px solid #ffddb8;
+  border-radius: 0.75rem;
+}
+
 @media (max-width: 575.98px) {
   .section-space {
     padding-top: 3.5rem;
@@ -348,5 +451,10 @@ body {
 
   .category-card {
     padding: 1.15rem;
+  }
+
+  .profile-avatar {
+    width: 6.5rem;
+    height: 6.5rem;
   }
 }

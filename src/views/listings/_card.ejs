@@ -1,6 +1,11 @@
 <article class="card product-card h-100 border-0">
-  <div class="listing-placeholder position-relative" aria-hidden="true">
-    <span>NTT</span>
+  <div class="listing-card-media position-relative">
+    <img
+      class="listing-card-image"
+      src="<%= listing.primaryImage %>"
+      alt="Ảnh sản phẩm <%= listing.title %>"
+      loading="lazy"
+    >
     <% if (listing.status === 'sold') { %>
       <span class="badge text-bg-danger listing-status-overlay">Đã bán</span>
     <% } %>

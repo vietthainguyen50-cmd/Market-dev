@@ -1,4 +1,4 @@
-<form action="<%= formAction %>" method="POST">
+<form action="<%= formAction %>" method="POST" enctype="multipart/form-data">
   <div class="mb-3">
     <label class="form-label fw-semibold" for="title">Tiêu đề</label>
     <input
@@ -109,9 +109,67 @@
     </div>
   </div>
 
-  <div class="alert alert-info mt-4" role="status">
-    Chức năng upload ảnh sẽ được bổ sung ở bước sau.
+  <% if (existingImages.length > 0) { %>
+    <fieldset class="mt-4">
+      <legend class="h5 fw-bold mb-2">Ảnh hiện tại</legend>
+      <p class="text-secondary small">
+        Bài đăng đang có <%= existingImages.length %> ảnh,
+        còn <%= remainingImageSlots %> vị trí trong giới hạn <%= maxImages %> ảnh.
+      </p>
+      <div class="row g-3">
+        <% existingImages.forEach((imagePath, index) => { %>
+          <div class="col-6 col-md-4">
+            <label class="listing-image-remove-card">
+              <img
+                class="listing-edit-thumbnail"
+                src="<%= imagePath %>"
+                alt="Ảnh <%= index + 1 %> của <%= listing.title %>"
+                loading="lazy"
+              >
+              <span class="form-check mt-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="removeImages"
+                  value="<%= imagePath %>"
+                  <%= selectedRemoveImages.includes(imagePath) ? 'checked' : '' %>
+                >
+                <span class="form-check-label">Xóa ảnh này</span>
+              </span>
+            </label>
+          </div>
+        <% }); %>
+      </div>
+    </fieldset>
+  <% } %>
+
+  <div class="mt-4">
+    <label class="form-label fw-semibold" for="images">
+      <%= existingImages.length > 0 ? 'Thêm ảnh mới' : 'Ảnh sản phẩm' %>
+    </label>
+    <input
+      class="form-control<%= errors.images ? ' is-invalid' : '' %>"
+      id="images"
+      name="images"
+      type="file"
+      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+      multiple
+      aria-describedby="imagesHelp"
+    >
+    <% if (errors.images) { %>
+      <div class="invalid-feedback"><%= errors.images %></div>
+    <% } %>
+    <div class="form-text" id="imagesHelp">
+      Ảnh không bắt buộc. Tối đa <%= maxImages %> ảnh cho mỗi bài đăng,
+      mỗi ảnh tối đa 5 MB. Chấp nhận JPG, JPEG, PNG và WEBP.
+    </div>
   </div>
+
+  <% if (retryImages) { %>
+    <div class="alert alert-warning mt-3 mb-0" role="alert">
+      Các file vừa chọn không được giữ lại. Vui lòng chọn lại ảnh trước khi gửi form.
+    </div>
+  <% } %>
 
   <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
     <button class="btn btn-primary px-4" type="submit" <%= canSubmit ? '' : 'disabled' %>>

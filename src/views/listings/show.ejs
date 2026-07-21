@@ -14,9 +14,35 @@
 
     <div class="row g-5">
       <div class="col-lg-6">
-        <div class="listing-detail-placeholder" aria-hidden="true">
-          <span>NTT Marketplace</span>
-        </div>
+        <% if (listing.hasImages) { %>
+          <div class="listing-gallery">
+            <img
+              class="listing-gallery-main"
+              src="<%= listing.images[0] %>"
+              alt="Ảnh chính của <%= listing.title %>"
+            >
+            <% if (listing.images.length > 1) { %>
+              <div class="row g-3 mt-1">
+                <% listing.images.slice(1).forEach((imagePath, index) => { %>
+                  <div class="col-6">
+                    <img
+                      class="listing-gallery-thumbnail"
+                      src="<%= imagePath %>"
+                      alt="Ảnh <%= index + 2 %> của <%= listing.title %>"
+                      loading="lazy"
+                    >
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <img
+            class="listing-gallery-main"
+            src="<%= listing.primaryImage %>"
+            alt="Bài đăng <%= listing.title %> chưa có ảnh"
+          >
+        <% } %>
       </div>
       <div class="col-lg-6">
         <div class="d-flex flex-wrap gap-2 mb-3">
