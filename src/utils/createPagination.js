@@ -7,7 +7,12 @@ const buildListingUrl = (filters, page) => {
   return query ? `/listings?${query}` : '/listings';
 };
 
-const createPagination = (pagination, filters) => {
+const buildFavoritesUrl = (page) =>
+  Number.isSafeInteger(page) && page > 1
+    ? `/favorites?page=${page}`
+    : '/favorites';
+
+const createPaginationLinks = (pagination, buildUrl) => {
   const { page, totalPages, hasPrev, hasNext } = pagination;
   const halfWindow = Math.floor(PAGE_WINDOW_SIZE / 2);
   let startPage = Math.max(1, page - halfWindow);
@@ -21,21 +26,29 @@ const createPagination = (pagination, filters) => {
     pages.push({
       number: pageNumber,
       isCurrent: pageNumber === page,
-      url: buildListingUrl(filters, pageNumber),
+      url: buildUrl(pageNumber),
     });
   }
 
   return {
     ...pagination,
     pages,
-    firstUrl: page > 1 ? buildListingUrl(filters, 1) : null,
-    previousUrl: hasPrev ? buildListingUrl(filters, page - 1) : null,
-    nextUrl: hasNext ? buildListingUrl(filters, page + 1) : null,
-    lastUrl: page < totalPages ? buildListingUrl(filters, totalPages) : null,
+    firstUrl: page > 1 ? buildUrl(1) : null,
+    previousUrl: hasPrev ? buildUrl(page - 1) : null,
+    nextUrl: hasNext ? buildUrl(page + 1) : null,
+    lastUrl: page < totalPages ? buildUrl(totalPages) : null,
   };
 };
 
+const createPagination = (pagination, filters) =>
+  createPaginationLinks(pagination, (page) => buildListingUrl(filters, page));
+
+const createFavoritesPagination = (pagination) =>
+  createPaginationLinks(pagination, buildFavoritesUrl);
+
 module.exports = {
+  buildFavoritesUrl,
   buildListingUrl,
+  createFavoritesPagination,
   createPagination,
 };

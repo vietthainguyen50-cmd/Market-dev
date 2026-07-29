@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     navbar.classList.toggle('is-scrolled', window.scrollY > 12);
   };
 
+  let frameRequested = false;
+
+  const requestNavbarUpdate = () => {
+    if (frameRequested) {
+      return;
+    }
+
+    frameRequested = true;
+    window.requestAnimationFrame(() => {
+      updateNavbar();
+      frameRequested = false;
+    });
+  };
+
   updateNavbar();
-  window.addEventListener('scroll', updateNavbar, { passive: true });
+  window.addEventListener('scroll', requestNavbarUpdate, { passive: true });
 });

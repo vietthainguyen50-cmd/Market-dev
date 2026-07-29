@@ -1,0 +1,18 @@
+[
+  {
+    "date": "2026-07-29",
+    "scope": "page",
+    "macrostructure": "Workbench / Product showroom + commerce inspector",
+    "theme": "studied-DNA structure / NTT Cobalt tokens (design.md locked)",
+    "enrichment": "interactive user-supplied product gallery",
+    "brief": "Listing detail · eBay-inspired information architecture"
+  },
+  {
+    "date": "2026-07-29",
+    "scope": "app",
+    "macrostructure": "Ecosystem Index / Catalogue / Workbench",
+    "theme": "NTT Cobalt",
+    "enrichment": "user-supplied product imagery",
+    "brief": "NTT Marketplace · multi-page UI foundation"
+  }
+]

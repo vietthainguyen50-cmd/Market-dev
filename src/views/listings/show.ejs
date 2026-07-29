@@ -1,8 +1,19 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageStyles: ['/css/listing-detail.css'] }) %>
 
 <section class="listing-detail-page" aria-labelledby="listing-detail-title">
   <div class="listing-detail-container">
-    <a class="listing-detail-back" href="/listings">Quay lại danh sách</a>
+    <nav class="listing-detail-breadcrumb" aria-label="Đường dẫn trang">
+      <ol>
+        <li><a href="/">Trang chủ</a></li>
+        <li><a href="/listings">Sản phẩm</a></li>
+        <% if (listing.category) { %>
+          <li>
+            <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
+          </li>
+        <% } %>
+        <li aria-current="page">Chi tiết</li>
+      </ol>
+    </nav>
 
     <div class="listing-detail-notices">
       <% if (successMessage) { %>
@@ -14,106 +25,166 @@
       <% } %>
     </div>
 
-    <div class="listing-detail-workbench">
+    <% const detailImages = listing.hasImages ? listing.images : [listing.primaryImage]; %>
+    <% const firstImageAlt = listing.hasImages ? `Ảnh 1 của ${listing.title}` : `Bài đăng ${listing.title} chưa có ảnh`; %>
+
+    <div class="listing-detail-workbench listing-detail-product-layout">
       <section class="listing-detail-gallery" aria-labelledby="listing-gallery-title">
         <header class="listing-detail-gallery-header">
-          <h2 class="listing-detail-gallery-title" id="listing-gallery-title">Ảnh sản phẩm</h2>
+          <h2 class="listing-detail-gallery-title" id="listing-gallery-title">Hình ảnh sản phẩm</h2>
           <p class="listing-detail-image-count">
-            <%= listing.imageCount %> / 5 ảnh
+            <%= listing.imageCount %> ảnh
           </p>
         </header>
 
-        <div class="listing-detail-image-grid">
-          <% if (listing.hasImages) { %>
-            <% listing.images.forEach((imagePath, index) => { %>
-              <figure
-                class="listing-detail-figure <%= index === 0 ? 'listing-detail-figure--primary' : 'listing-detail-figure--secondary' %>"
-                style="--gallery-index: <%= index %>"
-              >
-                <div class="listing-detail-media-frame">
+        <div
+          class="listing-detail-gallery-shell <%= detailImages.length > 1 ? 'has-thumbnails' : 'is-single-image' %>"
+          data-product-gallery
+        >
+          <% if (detailImages.length > 1) { %>
+            <div class="listing-detail-thumbnails" role="group" aria-label="Chọn ảnh sản phẩm">
+              <% detailImages.forEach((imagePath, index) => { %>
+                <button
+                  class="listing-detail-thumbnail <%= index === 0 ? 'is-active' : '' %>"
+                  type="button"
+                  data-gallery-thumbnail
+                  data-gallery-src="<%= imagePath %>"
+                  data-gallery-alt="Ảnh <%= index + 1 %> của <%= listing.title %>"
+                  data-gallery-index="<%= index + 1 %>"
+                  aria-label="Xem ảnh <%= index + 1 %> của <%= listing.title %>"
+                  aria-pressed="<%= index === 0 ? 'true' : 'false' %>"
+                >
+                  <img
+                    src="<%= imagePath %>"
+                    alt=""
+                    width="160"
+                    height="120"
+                    loading="<%= index === 0 ? 'eager' : 'lazy' %>"
+                  >
+                </button>
+              <% }); %>
+            </div>
+          <% } %>
+
+          <figure class="listing-detail-main-figure">
+            <div class="listing-detail-media-frame">
+              <% if (listing.hasImages) { %>
+                <a
+                  class="listing-detail-main-link"
+                  href="<%= detailImages[0] %>"
+                  target="_blank"
+                  rel="noopener"
+                  data-gallery-link
+                  aria-label="Mở ảnh sản phẩm kích thước đầy đủ"
+                >
                   <img
                     class="listing-detail-image"
-                    src="<%= imagePath %>"
-                    alt="Ảnh <%= index + 1 %> của <%= listing.title %>"
-                    <% if (index === 0) { %>
-                      fetchpriority="high"
-                    <% } else { %>
-                      loading="lazy"
-                    <% } %>
+                    src="<%= detailImages[0] %>"
+                    alt="<%= firstImageAlt %>"
+                    width="1200"
+                    height="900"
+                    fetchpriority="high"
+                    data-gallery-main
                   >
-                </div>
-                <figcaption class="listing-detail-image-caption">
-                  Ảnh <%= index + 1 %> / <%= listing.imageCount %>
-                </figcaption>
-              </figure>
-            <% }); %>
-          <% } else { %>
-            <figure class="listing-detail-figure listing-detail-figure--placeholder" style="--gallery-index: 0">
-              <div class="listing-detail-media-frame">
+                </a>
+              <% } else { %>
                 <img
                   class="listing-detail-image"
-                  src="<%= listing.primaryImage %>"
-                  alt="Bài đăng <%= listing.title %> chưa có ảnh"
+                  src="<%= detailImages[0] %>"
+                  alt="<%= firstImageAlt %>"
+                  width="1200"
+                  height="900"
                   fetchpriority="high"
+                  data-gallery-main
                 >
-              </div>
-              <figcaption class="listing-detail-image-caption">Chưa có ảnh sản phẩm</figcaption>
-            </figure>
-          <% } %>
+              <% } %>
+            </div>
+            <figcaption class="listing-detail-main-caption">
+              <span data-gallery-counter>
+                <%= listing.hasImages ? `Ảnh 1 / ${listing.imageCount}` : 'Chưa có ảnh sản phẩm' %>
+              </span>
+              <% if (listing.hasImages) { %>
+                <span>Mở ảnh để xem kích thước đầy đủ</span>
+              <% } %>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <aside class="listing-detail-inspector" aria-label="Thông tin sản phẩm">
-        <div class="listing-detail-status-row">
-          <span class="listing-detail-tag"><%= listing.conditionLabel %></span>
-          <span class="listing-detail-tag listing-detail-tag--<%= listing.status %>">
-            <%= listing.statusLabel %>
-          </span>
+      <aside class="listing-detail-inspector" aria-label="Thông tin mua bán">
+        <div class="listing-detail-summary">
+          <div class="listing-detail-status-row">
+            <span class="listing-detail-tag"><%= listing.conditionLabel %></span>
+            <span class="listing-detail-tag listing-detail-tag--<%= listing.status %>">
+              <%= listing.statusLabel %>
+            </span>
+          </div>
+
+          <% if (listing.category) { %>
+            <a class="listing-detail-category-link" href="/categories/<%= listing.category.slug %>">
+              <%= listing.category.name %>
+            </a>
+          <% } %>
+
+          <h1 class="listing-detail-title" id="listing-detail-title"><%= listing.title %></h1>
+
+          <div class="listing-detail-price-block">
+            <p class="listing-detail-price-label">Giá đăng bán</p>
+            <p class="listing-detail-price"><%= listing.formattedPrice %></p>
+          </div>
+
+          <div class="listing-detail-favorite-action">
+            <%- include('../favorites/_favorite-button', {
+              listing,
+              currentUser,
+              returnTo: currentUrl,
+              compact: false,
+              isFavorited: listing.isFavorited
+            }) %>
+          </div>
+
+          <dl class="listing-detail-meta listing-detail-summary-meta">
+            <div class="listing-detail-meta-group">
+              <dt>Tình trạng</dt>
+              <dd><%= listing.conditionLabel %></dd>
+            </div>
+            <div class="listing-detail-meta-group">
+              <dt>Địa điểm</dt>
+              <dd><%= listing.location %></dd>
+            </div>
+            <div class="listing-detail-meta-group">
+              <dt>Ngày đăng</dt>
+              <dd><%= listing.formattedCreatedAt %></dd>
+            </div>
+          </dl>
         </div>
 
-        <h1 class="listing-detail-title" id="listing-detail-title"><%= listing.title %></h1>
-        <p class="listing-detail-price"><%= listing.formattedPrice %></p>
-
-        <dl class="listing-detail-meta">
-          <div class="listing-detail-meta-group">
-            <dt>Danh mục</dt>
-            <dd>
-              <% if (listing.category) { %>
-                <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
-              <% } else { %>
-                Không còn tồn tại
-              <% } %>
-            </dd>
-          </div>
-          <div class="listing-detail-meta-group">
-            <dt>Địa điểm</dt>
-            <dd><%= listing.location %></dd>
-          </div>
-          <div class="listing-detail-meta-group">
-            <dt>Ngày đăng</dt>
-            <dd><%= listing.formattedCreatedAt %></dd>
-          </div>
-        </dl>
-
         <section class="listing-detail-seller" aria-labelledby="listing-seller-title">
-          <h2 class="listing-detail-seller-title" id="listing-seller-title">Thông tin người bán</h2>
+          <div class="listing-detail-seller-heading">
+            <h2 class="listing-detail-seller-title" id="listing-seller-title">Người bán</h2>
+            <span>Thông tin liên hệ</span>
+          </div>
           <div class="listing-detail-seller-body">
             <% if (listing.seller && listing.sellerAvatar) { %>
               <img
                 class="listing-detail-seller-avatar"
                 src="<%= listing.sellerAvatar %>"
                 alt="Ảnh đại diện của <%= listing.seller.name %>"
+                width="56"
+                height="56"
               >
             <% } else { %>
               <div class="listing-detail-seller-placeholder" aria-hidden="true">N</div>
             <% } %>
             <div class="listing-detail-seller-copy">
-              <p class="listing-detail-seller-label">Người bán</p>
               <p class="listing-detail-seller-name">
                 <%= listing.seller ? listing.seller.name : 'Người dùng không còn tồn tại' %>
               </p>
               <% if (listing.seller && listing.seller.phone) { %>
-                <p class="listing-detail-seller-phone"><%= listing.seller.phone %></p>
+                <p class="listing-detail-seller-phone">
+                  <span>Số điện thoại</span>
+                  <strong><%= listing.seller.phone %></strong>
+                </p>
               <% } %>
             </div>
           </div>
@@ -133,11 +204,17 @@
       </aside>
     </div>
 
-    <section class="listing-detail-description" aria-labelledby="listing-description-title">
-      <h2 class="listing-detail-section-title" id="listing-description-title">Mô tả sản phẩm</h2>
-      <p class="listing-detail-description-copy"><%= listing.description %></p>
-    </section>
+    <div class="listing-detail-lower-grid">
+      <section class="listing-detail-description" aria-labelledby="listing-description-title">
+        <header>
+          <h2 class="listing-detail-section-title" id="listing-description-title">Mô tả sản phẩm</h2>
+          <p>Nội dung do người bán cung cấp.</p>
+        </header>
+        <p class="listing-detail-description-copy"><%= listing.description %></p>
+      </section>
+    </div>
   </div>
 </section>
 
+<script src="/js/listing-detail.js" defer></script>
 <%- include('../partials/footer') %>

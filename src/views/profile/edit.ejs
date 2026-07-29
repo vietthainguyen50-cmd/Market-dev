@@ -4,11 +4,10 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-9">
-        <div class="profile-edit-panel bg-white border rounded-4 shadow-sm p-4 p-md-5">
-          <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div class="profile-edit-panel">
+          <div class="page-heading mb-4">
             <div>
-              <p class="section-kicker mb-2">Tài khoản của bạn</p>
-              <h1 class="h2 fw-bold mb-2">Chỉnh sửa hồ sơ</h1>
+              <h1 class="h2 mb-2">Chỉnh sửa hồ sơ</h1>
               <p class="text-secondary mb-0">Cập nhật thông tin liên hệ và ảnh đại diện.</p>
             </div>
             <a class="btn btn-outline-secondary align-self-md-start" href="/profile">Quay lại hồ sơ</a>
@@ -27,11 +26,13 @@
           <form method="POST" action="/profile?_method=PUT" enctype="multipart/form-data">
             <div class="row g-4">
               <div class="col-12 col-lg-4">
-                <div class="profile-avatar-panel border rounded-4 p-4 text-center h-100">
+                <div class="profile-avatar-panel p-4 text-center h-100">
                   <img
                     class="profile-avatar-preview mb-3"
                     src="<%= profileUser.avatarUrl %>"
                     alt="Ảnh đại diện hiện tại của <%= profileUser.name %>"
+                    width="160"
+                    height="160"
                   >
                   <label class="form-label fw-semibold" for="avatar">Ảnh đại diện mới</label>
                   <input
@@ -40,11 +41,11 @@
                     name="avatar"
                     type="file"
                     accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    aria-invalid="<%= errors.avatar ? 'true' : 'false' %>"
+                    aria-describedby="avatarError avatarHelp"
                   >
-                  <% if (errors.avatar) { %>
-                    <div class="invalid-feedback"><%= errors.avatar %></div>
-                  <% } %>
-                  <p class="small text-secondary mt-2 mb-0">Tối đa 2 MB. Chỉ JPG, JPEG, PNG hoặc WEBP.</p>
+                  <div class="invalid-feedback field-feedback-slot" id="avatarError"><%= errors.avatar || '' %></div>
+                  <p class="small text-secondary mt-2 mb-0" id="avatarHelp">Tối đa 2 MB. Chỉ JPG, JPEG, PNG hoặc WEBP.</p>
 
                   <% if (profileUser.hasManagedAvatar) { %>
                     <div class="form-check text-start mt-4 profile-remove-avatar">
@@ -67,11 +68,11 @@
                     maxlength="100"
                     autocomplete="name"
                     value="<%= oldInput.name %>"
+                    aria-invalid="<%= errors.name ? 'true' : 'false' %>"
+                    aria-describedby="profileNameError"
                     required
                   >
-                  <% if (errors.name) { %>
-                    <div class="invalid-feedback"><%= errors.name %></div>
-                  <% } %>
+                  <div class="invalid-feedback field-feedback-slot" id="profileNameError"><%= errors.name || '' %></div>
                 </div>
 
                 <div class="mb-3">
@@ -90,10 +91,10 @@
                     maxlength="20"
                     autocomplete="tel"
                     value="<%= oldInput.phone %>"
+                    aria-invalid="<%= errors.phone ? 'true' : 'false' %>"
+                    aria-describedby="profilePhoneError"
                   >
-                  <% if (errors.phone) { %>
-                    <div class="invalid-feedback"><%= errors.phone %></div>
-                  <% } %>
+                  <div class="invalid-feedback field-feedback-slot" id="profilePhoneError"><%= errors.phone || '' %></div>
                 </div>
 
                 <div class="mb-4">
@@ -105,10 +106,10 @@
                     rows="4"
                     maxlength="200"
                     autocomplete="street-address"
+                    aria-invalid="<%= errors.address ? 'true' : 'false' %>"
+                    aria-describedby="profileAddressError"
                   ><%= oldInput.address %></textarea>
-                  <% if (errors.address) { %>
-                    <div class="invalid-feedback"><%= errors.address %></div>
-                  <% } %>
+                  <div class="invalid-feedback field-feedback-slot" id="profileAddressError"><%= errors.address || '' %></div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2">

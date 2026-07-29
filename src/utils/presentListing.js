@@ -14,7 +14,7 @@ const statusLabels = {
   hidden: 'Đã ẩn',
 };
 
-const presentListing = (listing) => {
+const presentListing = (listing, options = {}) => {
   const data = listing?.toObject ? listing.toObject() : listing;
   const images = Array.isArray(data.images)
     ? data.images.filter(isListingImagePublicPath)
@@ -32,6 +32,7 @@ const presentListing = (listing) => {
     ),
     conditionLabel: conditionLabels[data.condition] || data.condition,
     statusLabel: statusLabels[data.status] || data.status,
+    isFavorited: Boolean(options.isFavorited),
   };
 };
 

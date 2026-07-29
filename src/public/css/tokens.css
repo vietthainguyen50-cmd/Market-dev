@@ -1,4 +1,7 @@
-/* NTT Marketplace · Hallmark tokens · utilitarian product detail */
+/* Hallmark · genre: modern-minimal · macrostructure family: Ecosystem Index / Catalogue / Workbench
+ * design-system: design.md · designed-as-app · theme: NTT Cobalt
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ */
 :root {
   --color-paper: oklch(98% 0.008 250);
   --color-paper-2: oklch(95% 0.012 250);
@@ -6,6 +9,7 @@
   --color-ink: oklch(20% 0.025 255);
   --color-ink-2: oklch(34% 0.025 255);
   --color-muted: oklch(45% 0.02 255);
+  --color-neutral: oklch(38% 0.022 255);
   --color-rule: oklch(72% 0.018 250);
   --color-rule-2: oklch(86% 0.014 250);
   --color-accent: oklch(52% 0.19 255);
@@ -18,10 +22,32 @@
   --color-danger-surface: oklch(95% 0.035 28);
   --color-warning: oklch(48% 0.11 76);
   --color-warning-surface: oklch(95% 0.045 76);
+  --color-info: oklch(43% 0.12 235);
+  --color-info-surface: oklch(95% 0.03 235);
+  --color-sold: var(--color-danger);
+  --color-sold-surface: var(--color-danger-surface);
+  --color-hidden: oklch(40% 0.02 255);
+  --color-hidden-surface: var(--color-paper-3);
+
+  --color-primary: var(--color-accent);
+  --color-primary-hover: var(--color-accent-hover);
+  --color-background: var(--color-paper-2);
+  --color-surface: var(--color-paper);
+  --color-surface-subtle: var(--color-paper-3);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-muted);
+  --color-border: var(--color-rule-2);
 
   --font-display: Bahnschrift, "Arial Narrow", "Aptos Display", sans-serif;
   --font-body: Aptos, "Segoe UI", system-ui, sans-serif;
   --font-outlier: "Cascadia Mono", "SFMono-Regular", ui-monospace, monospace;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --tracking-display: -0.025em;
+  --tracking-label: 0.08em;
+  --line-height-tight: 1.15;
+  --line-height-body: 1.6;
 
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
@@ -32,6 +58,7 @@
   --space-xl: 2.5rem;
   --space-2xl: 4rem;
   --space-3xl: 6rem;
+  --space-4xl: 9rem;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -53,6 +80,30 @@
   --radius-control: 0.375rem;
   --radius-frame: 0.625rem;
   --radius-panel: 0.75rem;
+  --radius-small: var(--radius-control);
+  --radius-medium: var(--radius-frame);
+  --radius-large: var(--radius-panel);
+  --radius-card: var(--radius-panel);
+  --radius-input: var(--radius-control);
+  --radius-pill: 999px;
   --rule-thin: 1px;
+  --rule-fine: 2px;
+  --shadow-small: 0 1px 2px oklch(20% 0.025 255 / 0.06);
+  --shadow-card: 0 0.75rem 2rem oklch(20% 0.025 255 / 0.08);
+  --shadow-prominent: 0 1.25rem 3rem oklch(20% 0.025 255 / 0.12);
+  --shadow-focus: 0 0 0 0.1875rem oklch(30% 0.16 255 / 0.18);
+
+  --container-max: 82rem;
+  --header-height: 4.5rem;
+  --form-max: 48rem;
+  --listing-image-ratio: 4 / 3;
+  --control-height: 2.75rem;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
   --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
 }

@@ -8,6 +8,7 @@ const { createSessionMiddleware } = require('./config/session');
 const adminCategoryRoutes = require('./routes/adminCategory.routes');
 const authRoutes = require('./routes/auth.routes');
 const categoryRoutes = require('./routes/category.routes');
+const favoriteRoutes = require('./routes/favorite.routes');
 const homeRoutes = require('./routes/home.routes');
 const listingRoutes = require('./routes/listing.routes');
 const profileRoutes = require('./routes/profile.routes');
@@ -65,6 +66,7 @@ app.use(loadCurrentUser);
 
 app.use('/', authRoutes);
 app.use('/', profileRoutes);
+app.use('/', favoriteRoutes);
 app.use('/', listingRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/admin/categories', adminCategoryRoutes);

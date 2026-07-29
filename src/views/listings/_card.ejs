@@ -1,38 +1,60 @@
-<article class="card product-card h-100 border-0">
+<article class="card product-card">
   <div class="listing-card-media position-relative">
     <img
       class="listing-card-image"
       src="<%= listing.primaryImage %>"
       alt="Ảnh sản phẩm <%= listing.title %>"
+      width="800"
+      height="600"
       loading="lazy"
     >
-    <% if (listing.status === 'sold') { %>
-      <span class="badge text-bg-danger listing-status-overlay">Đã bán</span>
+    <% if (listing.status === 'sold' || listing.status === 'hidden') { %>
+      <span class="badge status-badge status-badge--<%= listing.status %> listing-status-overlay">
+        <%= listing.statusLabel %>
+      </span>
+    <% } %>
+    <% if (typeof showFavoriteAction !== 'undefined' && showFavoriteAction) { %>
+      <div class="listing-card-favorite">
+        <%- include('../favorites/_favorite-button', {
+          listing,
+          currentUser,
+          returnTo: favoriteReturnTo,
+          compact: true,
+          isFavorited: listing.isFavorited
+        }) %>
+      </div>
     <% } %>
   </div>
-  <div class="card-body p-4 d-flex flex-column">
-    <div class="d-flex flex-wrap gap-2 mb-3">
+  <div class="card-body d-flex flex-column">
+    <div class="listing-card-statuses">
       <span class="condition-badge"><%= listing.conditionLabel %></span>
       <% if (listing.status === 'sold') { %>
-        <span class="badge text-bg-danger">Đã bán</span>
+        <span class="badge status-badge status-badge--sold">Đã bán</span>
+      <% } else if (listing.status === 'hidden') { %>
+        <span class="badge status-badge status-badge--hidden">Đã ẩn</span>
       <% } %>
     </div>
-    <h2 class="h5 fw-bold mb-2"><%= listing.title %></h2>
-    <p class="product-price mb-2"><%= listing.formattedPrice %></p>
-    <p class="small text-secondary mb-1">
-      Danh mục:
-      <% if (listing.category) { %>
-        <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
-      <% } else { %>
-        Không còn tồn tại
-      <% } %>
-    </p>
-    <p class="small text-secondary mb-1">
-      <span aria-hidden="true">📍</span> <%= listing.location %>
-    </p>
-    <p class="small text-secondary mb-3">Đăng ngày <%= listing.formattedCreatedAt %></p>
+    <h2 class="h5 listing-card-title mb-2"><%= listing.title %></h2>
+    <p class="product-price"><%= listing.formattedPrice %></p>
+    <div class="listing-card-meta">
+      <p>
+        Danh mục:
+        <% if (listing.category) { %>
+          <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
+        <% } else { %>
+          Không còn tồn tại
+        <% } %>
+      </p>
+      <p><span>Địa điểm:</span> <%= listing.location %></p>
+      <p>Đăng ngày <%= listing.formattedCreatedAt %></p>
+    </div>
     <a class="btn btn-outline-primary mt-auto" href="/listings/<%= listing._id %>">
       Xem chi tiết
     </a>
+    <% if (typeof showManageActions !== 'undefined' && showManageActions) { %>
+      <div class="listing-card-management">
+        <%- include('_actions', { listing }) %>
+      </div>
+    <% } %>
   </div>
 </article>

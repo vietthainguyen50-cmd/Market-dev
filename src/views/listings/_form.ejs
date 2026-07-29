@@ -1,4 +1,10 @@
-<form action="<%= formAction %>" method="POST" enctype="multipart/form-data">
+<form class="listing-form" action="<%= formAction %>" method="POST" enctype="multipart/form-data">
+  <section class="form-section" aria-labelledby="listing-basic-title">
+    <div>
+      <h2 class="form-section-title" id="listing-basic-title">Thông tin cơ bản</h2>
+      <p class="small text-secondary mb-0">Đặt tiêu đề rõ ràng và mô tả đúng tình trạng sản phẩm.</p>
+    </div>
+
   <div class="mb-3">
     <label class="form-label fw-semibold" for="title">Tiêu đề</label>
     <input
@@ -9,11 +15,11 @@
       value="<%= oldInput.title %>"
       minlength="5"
       maxlength="150"
+      aria-invalid="<%= errors.title ? 'true' : 'false' %>"
+      aria-describedby="titleError"
       required
     >
-    <% if (errors.title) { %>
-      <div class="invalid-feedback"><%= errors.title %></div>
-    <% } %>
+    <div class="invalid-feedback field-feedback-slot" id="titleError"><%= errors.title || '' %></div>
   </div>
 
   <div class="mb-3">
@@ -25,12 +31,19 @@
       rows="7"
       minlength="20"
       maxlength="3000"
+      aria-invalid="<%= errors.description ? 'true' : 'false' %>"
+      aria-describedby="descriptionError"
       required
     ><%= oldInput.description %></textarea>
-    <% if (errors.description) { %>
-      <div class="invalid-feedback"><%= errors.description %></div>
-    <% } %>
+    <div class="invalid-feedback field-feedback-slot" id="descriptionError"><%= errors.description || '' %></div>
   </div>
+  </section>
+
+  <section class="form-section" aria-labelledby="listing-details-title">
+    <div>
+      <h2 class="form-section-title" id="listing-details-title">Giá và thông tin phân loại</h2>
+      <p class="small text-secondary mb-0">Giúp người mua lọc sản phẩm theo nhu cầu.</p>
+    </div>
 
   <div class="row g-3">
     <div class="col-md-6">
@@ -44,11 +57,11 @@
         min="0"
         max="100000000000"
         step="1"
+        aria-invalid="<%= errors.price ? 'true' : 'false' %>"
+        aria-describedby="priceError"
         required
       >
-      <% if (errors.price) { %>
-        <div class="invalid-feedback"><%= errors.price %></div>
-      <% } %>
+      <div class="invalid-feedback field-feedback-slot" id="priceError"><%= errors.price || '' %></div>
     </div>
 
     <div class="col-md-6">
@@ -57,6 +70,8 @@
         class="form-select<%= errors.category ? ' is-invalid' : '' %>"
         id="category"
         name="category"
+        aria-invalid="<%= errors.category ? 'true' : 'false' %>"
+        aria-describedby="categoryError"
         required
       >
         <option value="">Chọn danh mục</option>
@@ -70,9 +85,7 @@
           </option>
         <% }); %>
       </select>
-      <% if (errors.category) { %>
-        <div class="invalid-feedback"><%= errors.category %></div>
-      <% } %>
+      <div class="invalid-feedback field-feedback-slot" id="categoryError"><%= errors.category || '' %></div>
     </div>
 
     <div class="col-md-6">
@@ -85,11 +98,11 @@
         value="<%= oldInput.location %>"
         minlength="2"
         maxlength="150"
+        aria-invalid="<%= errors.location ? 'true' : 'false' %>"
+        aria-describedby="locationError"
         required
       >
-      <% if (errors.location) { %>
-        <div class="invalid-feedback"><%= errors.location %></div>
-      <% } %>
+      <div class="invalid-feedback field-feedback-slot" id="locationError"><%= errors.location || '' %></div>
     </div>
 
     <div class="col-md-6">
@@ -98,17 +111,23 @@
         class="form-select<%= errors.condition ? ' is-invalid' : '' %>"
         id="condition"
         name="condition"
+        aria-invalid="<%= errors.condition ? 'true' : 'false' %>"
+        aria-describedby="conditionError"
         required
       >
         <option value="used"<%= oldInput.condition === 'used' ? ' selected' : '' %>>Đã sử dụng</option>
         <option value="new"<%= oldInput.condition === 'new' ? ' selected' : '' %>>Mới</option>
       </select>
-      <% if (errors.condition) { %>
-        <div class="invalid-feedback"><%= errors.condition %></div>
-      <% } %>
+      <div class="invalid-feedback field-feedback-slot" id="conditionError"><%= errors.condition || '' %></div>
     </div>
   </div>
+  </section>
 
+  <section class="form-section" aria-labelledby="listing-images-title">
+    <div>
+      <h2 class="form-section-title" id="listing-images-title">Ảnh sản phẩm</h2>
+      <p class="small text-secondary mb-0">Ảnh đầu tiên sẽ được dùng làm ảnh chính.</p>
+    </div>
   <% if (existingImages.length > 0) { %>
     <fieldset class="mt-4">
       <legend class="h5 fw-bold mb-2">Ảnh hiện tại</legend>
@@ -124,6 +143,8 @@
                 class="listing-edit-thumbnail"
                 src="<%= imagePath %>"
                 alt="Ảnh <%= index + 1 %> của <%= listing.title %>"
+                width="800"
+                height="600"
                 loading="lazy"
               >
               <span class="form-check mt-2">
@@ -154,11 +175,10 @@
       type="file"
       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
       multiple
-      aria-describedby="imagesHelp"
+      aria-invalid="<%= errors.images ? 'true' : 'false' %>"
+      aria-describedby="imagesError imagesHelp"
     >
-    <% if (errors.images) { %>
-      <div class="invalid-feedback"><%= errors.images %></div>
-    <% } %>
+    <div class="invalid-feedback field-feedback-slot" id="imagesError"><%= errors.images || '' %></div>
     <div class="form-text" id="imagesHelp">
       Ảnh không bắt buộc. Tối đa <%= maxImages %> ảnh cho mỗi bài đăng,
       mỗi ảnh tối đa 5 MB. Chấp nhận JPG, JPEG, PNG và WEBP.
@@ -170,8 +190,9 @@
       Các file vừa chọn không được giữ lại. Vui lòng chọn lại ảnh trước khi gửi form.
     </div>
   <% } %>
+  </section>
 
-  <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+  <div class="form-actions">
     <button class="btn btn-primary px-4" type="submit" <%= canSubmit ? '' : 'disabled' %>>
       <%= submitLabel %>
     </button>

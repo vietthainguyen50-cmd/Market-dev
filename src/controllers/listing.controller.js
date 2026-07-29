@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const categoryService = require('../services/category.service');
+const favoriteService = require('../services/favorite.service');
 const listingService = require('../services/listing.service');
 const { MAX_LISTING_IMAGES } = require('../middlewares/upload.middleware');
 const {
@@ -129,7 +130,9 @@ const getImageFormData = ({
 const renderListingDetail = (req, res, listing, options = {}) => {
   const isOwner = isListingOwner(listing, req.user);
   const canManage = canManageListing(listing, req.user);
-  const presentedListing = presentListing(listing);
+  const presentedListing = presentListing(listing, {
+    isFavorited: options.isFavorited,
+  });
   presentedListing.sellerAvatar =
     getSafeAvatar(listing.seller?.avatar) || DEFAULT_AVATAR;
 
@@ -140,6 +143,7 @@ const renderListingDetail = (req, res, listing, options = {}) => {
     canManage,
     errors: options.errors || {},
     successMessage: options.successMessage || '',
+    currentUrl: req.originalUrl,
   });
 };
 
@@ -192,6 +196,7 @@ const renderPublicListings = (res, options) => {
     filterErrors: options.filterErrors || {},
     pagination,
     totalItems: pagination.totalItems,
+    currentUrl: options.currentUrl || '/listings',
   });
 };
 
@@ -242,11 +247,21 @@ const listListings = async (req, res, next) => {
       );
     }
 
+    const favoriteListingIds = await favoriteService.getFavoriteListingIds(
+      req.user?._id,
+      result.items.map((listing) => listing._id),
+    );
+
     return renderPublicListings(res, {
-      listings: result.items.map(presentListing),
+      listings: result.items.map((listing) =>
+        presentListing(listing, {
+          isFavorited: favoriteListingIds.has(listing._id.toString()),
+        }),
+      ),
       categories,
       filters,
       pagination: result.pagination,
+      currentUrl: req.originalUrl,
     });
   } catch (error) {
     return next(error);
@@ -265,8 +280,15 @@ const showListing = async (req, res, next) => {
       return renderNotFound(req, res);
     }
 
+    const isOwner = isListingOwner(listing, req.user);
+    const isFavorited =
+      req.user && !isOwner && listing.status !== 'hidden'
+        ? await favoriteService.isListingFavorited(req.user._id, listing._id)
+        : false;
+
     return renderListingDetail(req, res, listing, {
       successMessage: getDetailSuccessMessage(req.query),
+      isFavorited,
     });
   } catch (error) {
     return next(error);

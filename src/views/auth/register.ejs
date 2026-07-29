@@ -1,14 +1,14 @@
 <%- include('../partials/header') %>
 
-<section class="auth-section py-5">
+<section class="auth-section">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12 col-md-9 col-lg-6 col-xl-5">
-        <div class="auth-panel bg-white border shadow-sm p-4 p-md-5">
-          <h1 class="h2 fw-bold mb-2">Đăng ký tài khoản</h1>
-          <p class="text-secondary mb-4">
-            Tạo tài khoản NTT Marketplace để sẵn sàng mua bán cùng cộng đồng.
-          </p>
+        <div class="auth-panel">
+          <header class="auth-panel-header">
+            <h1 class="h2">Đăng ký tài khoản</h1>
+            <p class="text-secondary">Tạo tài khoản để đăng và quản lý sản phẩm của bạn.</p>
+          </header>
 
           <% if (successMessage) { %>
             <div class="alert alert-success" role="status"><%= successMessage %></div>
@@ -18,7 +18,7 @@
             <div class="alert alert-danger" role="alert"><%= errors.general %></div>
           <% } %>
 
-          <form action="/register" method="post">
+          <form class="auth-form" action="/register" method="post">
             <div class="mb-3">
               <label class="form-label fw-semibold" for="name">Họ và tên</label>
               <input
@@ -30,11 +30,11 @@
                 autocomplete="name"
                 minlength="2"
                 maxlength="100"
+                aria-invalid="<%= errors.name ? 'true' : 'false' %>"
+                aria-describedby="registerNameError"
                 required
               >
-              <% if (errors.name) { %>
-                <div class="invalid-feedback"><%= errors.name %></div>
-              <% } %>
+              <div class="invalid-feedback field-feedback-slot" id="registerNameError"><%= errors.name || '' %></div>
             </div>
 
             <div class="mb-3">
@@ -47,11 +47,11 @@
                 value="<%= oldInput.email || '' %>"
                 autocomplete="email"
                 maxlength="254"
+                aria-invalid="<%= errors.email ? 'true' : 'false' %>"
+                aria-describedby="registerEmailError"
                 required
               >
-              <% if (errors.email) { %>
-                <div class="invalid-feedback"><%= errors.email %></div>
-              <% } %>
+              <div class="invalid-feedback field-feedback-slot" id="registerEmailError"><%= errors.email || '' %></div>
             </div>
 
             <div class="mb-3">
@@ -64,11 +64,11 @@
                 autocomplete="new-password"
                 minlength="8"
                 maxlength="72"
+                aria-invalid="<%= errors.password ? 'true' : 'false' %>"
+                aria-describedby="registerPasswordError"
                 required
               >
-              <% if (errors.password) { %>
-                <div class="invalid-feedback"><%= errors.password %></div>
-              <% } %>
+              <div class="invalid-feedback field-feedback-slot" id="registerPasswordError"><%= errors.password || '' %></div>
             </div>
 
             <div class="mb-4">
@@ -81,14 +81,14 @@
                 autocomplete="new-password"
                 minlength="8"
                 maxlength="72"
+                aria-invalid="<%= errors.confirmPassword ? 'true' : 'false' %>"
+                aria-describedby="registerConfirmError"
                 required
               >
-              <% if (errors.confirmPassword) { %>
-                <div class="invalid-feedback"><%= errors.confirmPassword %></div>
-              <% } %>
+              <div class="invalid-feedback field-feedback-slot" id="registerConfirmError"><%= errors.confirmPassword || '' %></div>
             </div>
 
-            <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Đăng ký</button>
+            <button class="btn btn-primary w-100" type="submit">Đăng ký</button>
           </form>
 
           <p class="text-center text-secondary mt-4 mb-2">

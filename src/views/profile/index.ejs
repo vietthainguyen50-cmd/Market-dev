@@ -6,18 +6,19 @@
       <div class="alert alert-success" role="status"><%= successMessage %></div>
     <% } %>
 
-    <div class="profile-hero bg-white border rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+    <div class="profile-hero bg-white border mb-4">
       <div class="row align-items-center g-4">
         <div class="col-auto">
           <img
             class="profile-avatar"
             src="<%= profileUser.avatarUrl %>"
             alt="Ảnh đại diện của <%= profileUser.name %>"
+            width="128"
+            height="128"
           >
         </div>
         <div class="col-12 col-md">
-          <p class="section-kicker mb-2">Hồ sơ cá nhân</p>
-          <h1 class="h2 fw-bold mb-2"><%= profileUser.name %></h1>
+          <h1 class="h2 mb-2"><%= profileUser.name %></h1>
           <p class="text-secondary mb-1"><%= profileUser.email %></p>
           <p class="small text-secondary mb-0">
             Tham gia từ ngày <%= profileUser.formattedCreatedAt %>
@@ -42,70 +43,49 @@
 
     <div class="row g-3 mb-5" aria-label="Thống kê bài đăng">
       <div class="col-6 col-lg-3">
-        <article class="profile-stat-card bg-white border rounded-4 p-4 h-100">
+        <article class="profile-stat-card bg-white border h-100">
           <p class="small text-secondary mb-2">Tổng bài đăng</p>
           <p class="h2 fw-bold mb-0" data-stat="total"><%= stats.totalListings %></p>
         </article>
       </div>
       <div class="col-6 col-lg-3">
-        <article class="profile-stat-card bg-white border rounded-4 p-4 h-100">
+        <article class="profile-stat-card bg-white border h-100">
           <p class="small text-secondary mb-2">Đang bán</p>
-          <p class="h2 fw-bold text-success mb-0" data-stat="active"><%= stats.activeListings %></p>
+          <p class="h2 fw-bold mb-0" data-stat="active"><%= stats.activeListings %></p>
         </article>
       </div>
       <div class="col-6 col-lg-3">
-        <article class="profile-stat-card bg-white border rounded-4 p-4 h-100">
+        <article class="profile-stat-card bg-white border h-100">
           <p class="small text-secondary mb-2">Đã bán</p>
-          <p class="h2 fw-bold text-danger mb-0" data-stat="sold"><%= stats.soldListings %></p>
+          <p class="h2 fw-bold mb-0" data-stat="sold"><%= stats.soldListings %></p>
         </article>
       </div>
       <div class="col-6 col-lg-3">
-        <article class="profile-stat-card bg-white border rounded-4 p-4 h-100">
+        <article class="profile-stat-card bg-white border h-100">
           <p class="small text-secondary mb-2">Đã ẩn</p>
-          <p class="h2 fw-bold text-secondary mb-0" data-stat="hidden"><%= stats.hiddenListings %></p>
+          <p class="h2 fw-bold mb-0" data-stat="hidden"><%= stats.hiddenListings %></p>
         </article>
       </div>
     </div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4">
+    <div class="page-section-head mb-4">
       <div>
-        <p class="section-kicker mb-2">Hoạt động gần đây</p>
-        <h2 class="h3 fw-bold mb-0">Bài đăng mới nhất của bạn</h2>
+        <h2 class="h3 mb-2">Bài đăng mới nhất của bạn</h2>
+        <p class="text-secondary mb-0">Theo dõi nhanh trạng thái các tin gần đây.</p>
       </div>
-      <a class="link-primary fw-semibold" href="/my-listings">Xem tất cả bài đăng</a>
+      <a class="btn btn-outline-secondary" href="/my-listings">Xem tất cả tin</a>
     </div>
 
     <% if (recentListings.length > 0) { %>
       <div class="row g-4">
         <% recentListings.forEach((listing) => { %>
-          <div class="col-sm-6 col-xl-3" data-recent-listing="<%= listing._id %>">
-            <article class="card product-card h-100 border-0">
-              <div class="listing-card-media position-relative">
-                <img
-                  class="listing-card-image"
-                  src="<%= listing.primaryImage %>"
-                  alt="Ảnh sản phẩm <%= listing.title %>"
-                  loading="lazy"
-                >
-                <span class="badge <%= listing.status === 'active' ? 'text-bg-success' : listing.status === 'sold' ? 'text-bg-danger' : 'text-bg-secondary' %> listing-status-overlay">
-                  <%= listing.statusLabel %>
-                </span>
-              </div>
-              <div class="card-body p-4 d-flex flex-column">
-                <span class="condition-badge align-self-start mb-3"><%= listing.conditionLabel %></span>
-                <h3 class="h5 fw-bold mb-2"><%= listing.title %></h3>
-                <p class="product-price mb-2"><%= listing.formattedPrice %></p>
-                <p class="small text-secondary mb-3">
-                  <%= listing.category ? listing.category.name : 'Danh mục không còn tồn tại' %>
-                </p>
-                <a class="btn btn-outline-primary mt-auto" href="/listings/<%= listing._id %>">Xem chi tiết</a>
-              </div>
-            </article>
+          <div class="col-12 col-sm-6 col-xl-3" data-recent-listing="<%= listing._id %>">
+            <%- include('../listings/_card', { listing }) %>
           </div>
         <% }); %>
       </div>
     <% } else { %>
-      <div class="listing-empty-state border rounded-4 bg-white p-4 p-md-5 text-center" role="status">
+      <div class="listing-empty-state" role="status">
         <h3 class="h4 fw-bold">Bạn chưa có bài đăng nào.</h3>
         <p class="text-secondary">Hãy đăng sản phẩm đầu tiên để bắt đầu kết nối với người mua.</p>
         <a class="btn btn-primary" href="/listings/create">Đăng tin đầu tiên</a>

@@ -1,13 +1,14 @@
 <%- include('../partials/header') %>
 
-<section class="auth-section py-5">
+<section class="form-page">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12 col-lg-9 col-xl-8">
-        <div class="auth-panel bg-white border shadow-sm p-4 p-md-5">
-          <p class="section-kicker">Bài đăng của tôi</p>
-          <h1 class="h2 fw-bold mb-2">Chỉnh sửa bài đăng</h1>
-          <p class="text-secondary mb-4">Cập nhật thông tin sản phẩm; người bán và trạng thái không thay đổi trong form này.</p>
+        <div class="form-panel">
+          <header class="form-panel-header">
+            <h1 class="h2">Chỉnh sửa bài đăng</h1>
+            <p class="text-secondary">Cập nhật thông tin sản phẩm; người bán và trạng thái không thay đổi tại đây.</p>
+          </header>
 
           <%- include('_form', {
             formAction: '/listings/' + listing._id + '?_method=PUT',

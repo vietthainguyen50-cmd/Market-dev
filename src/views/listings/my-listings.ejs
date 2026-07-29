@@ -2,10 +2,9 @@
 
 <section class="section-space">
   <div class="container">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+    <div class="page-heading mb-4">
       <div>
-        <p class="section-kicker">Khu vực người bán</p>
-        <h1 class="fw-bold mb-2">Bài đăng của tôi</h1>
+        <h1 class="mb-2">Bài đăng của tôi</h1>
         <p class="text-secondary mb-0">Quản lý bài đang bán, đã bán và đã ẩn.</p>
       </div>
       <a class="btn btn-primary" href="/listings/create">Đăng sản phẩm mới</a>
@@ -22,38 +21,16 @@
     <% if (listings.length > 0) { %>
       <div class="row g-4">
         <% listings.forEach((listing) => { %>
-          <div class="col-12 col-lg-6">
-            <article class="bg-white border rounded-4 shadow-sm p-4 h-100">
-              <div class="listing-card-media rounded-3 mb-3">
-                <img
-                  class="listing-card-image"
-                  src="<%= listing.primaryImage %>"
-                  alt="Ảnh sản phẩm <%= listing.title %>"
-                  loading="lazy"
-                >
-              </div>
-              <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
-                <span class="badge <%= listing.status === 'active' ? 'text-bg-success' : listing.status === 'sold' ? 'text-bg-danger' : 'text-bg-secondary' %>">
-                  <%= listing.statusLabel %>
-                </span>
-                <span class="small text-secondary"><%= listing.formattedCreatedAt %></span>
-              </div>
-              <h2 class="h5 fw-bold"><%= listing.title %></h2>
-              <p class="product-price mb-2"><%= listing.formattedPrice %></p>
-              <p class="text-secondary mb-3">
-                Danh mục: <%= listing.category ? listing.category.name : 'Không còn tồn tại' %>
-              </p>
-              <div class="d-flex flex-wrap gap-2 mb-3">
-                <a class="btn btn-sm btn-outline-dark" href="/listings/<%= listing._id %>">Xem</a>
-              </div>
-              <%- include('_actions', { listing }) %>
-            </article>
+          <div class="col-12 col-md-6 col-xl-4">
+            <%- include('_card', { listing, showManageActions: true }) %>
           </div>
         <% }); %>
       </div>
     <% } else { %>
-      <div class="alert alert-info" role="status">
-        Bạn chưa có bài đăng nào.
+      <div class="empty-state" role="status">
+        <h2 class="h4">Bạn chưa có bài đăng nào.</h2>
+        <p class="text-secondary">Tạo bài đăng đầu tiên để bắt đầu kết nối với người mua.</p>
+        <a class="btn btn-primary" href="/listings/create">Đăng sản phẩm</a>
       </div>
     <% } %>
   </div>

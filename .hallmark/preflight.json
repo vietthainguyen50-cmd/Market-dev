@@ -1,0 +1,14 @@
+{
+  "date": "2026-07-29",
+  "framework": "Express 5 + EJS + Bootstrap 5",
+  "font_stack": "Bahnschrift display, Aptos body, Cascadia Mono outlier",
+  "palette": "OKLCH custom properties in src/public/css/tokens.css",
+  "motion": "motion-cut; no motion library; one existing CSS gallery entrance",
+  "spacing": "4-point Hallmark scale",
+  "preserve": [
+    "existing NTT cobalt palette",
+    "existing system font stack",
+    "existing listing-detail Workbench structure",
+    "Bootstrap and current MVC boundaries"
+  ]
+}

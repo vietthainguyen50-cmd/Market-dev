@@ -297,6 +297,32 @@ npm run test:e2e:profile
 
 Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra session/profile/avatar trên HTTP và MongoDB thật, sau đó xóa đúng User, session và avatar của lần chạy đó. Script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret; không dùng `deleteMany({})`, không xóa Listing và không giữ dữ liệu test.
 
+## Sản phẩm yêu thích
+
+Bước 10 bổ sung danh sách tin đã lưu dành riêng cho người dùng đã đăng nhập. Model `Favorite` chỉ lưu reference `user`, `listing` và timestamps; unique compound index `{ user: 1, listing: 1 }` bảo đảm mỗi người chỉ lưu một Listing một lần, kể cả khi có hai request gần đồng thời. Index `{ user: 1, createdAt: -1 }` hỗ trợ sắp xếp theo thời điểm lưu mới nhất.
+
+Các route đều dùng `requireAuth`:
+
+- `GET /favorites`: hiển thị danh sách tin đã lưu.
+- `POST /listings/:id/favorite`: lưu một Listing.
+- `DELETE /listings/:id/favorite`: bỏ lưu bằng method override.
+
+User ID luôn lấy từ `req.user._id`; request không được chọn Favorite owner. Người dùng có thể lưu Listing `active` hoặc `sold`, nhưng không thể lưu Listing `hidden`, Listing không tồn tại hoặc Listing của chính mình. Thêm và bỏ lưu đều idempotent; duplicate key được xử lý như trạng thái đã lưu thay vì đưa lỗi `E11000` ra giao diện. `returnTo` chỉ chấp nhận đường dẫn nội bộ để tránh open redirect.
+
+Trang Favorites phân trang trong MongoDB, tối đa 12 Listing mỗi trang và sắp xếp theo `Favorite.createdAt` giảm dần. Aggregation lọc Listing `active`/`sold` trước khi đếm, `skip` và `limit`, vì vậy Listing `hidden` hoặc reference không còn tồn tại không làm sai tổng trang và không tạo card rỗng. Soft delete Listing không xóa Favorite document; nếu Listing được kích hoạt lại thì tin đã lưu tự xuất hiện trở lại. Listing `sold` vẫn hiển thị với nhãn “Đã bán”.
+
+Trạng thái tim được tích hợp vào trang chủ, kết quả tìm kiếm, chi tiết Category và Listing detail. Mỗi danh sách chỉ dùng một truy vấn Favorite với `$in`, không query theo từng card; guest không phát sinh truy vấn Favorite và được dẫn tới đăng nhập. Nút tim dùng SVG tĩnh do dự án kiểm soát, có `aria-label`, focus-visible, hover nhẹ, reduced-motion và Hallmark tokens hiện tại.
+
+Bước 10 chưa triển khai Chat, Socket.IO, notification, Favorite Category, public Favorites hoặc Favorite count trên Header.
+
+Khi `.env` trỏ tới database development dành cho kiểm thử, có thể chạy verifier Favorite đầy đủ:
+
+```bash
+npm run test:e2e:favorite
+```
+
+Verifier tạo User, Category, Listing và Favorite có nhãn Step 10 riêng, kiểm tra route HTTP/session cùng MongoDB thật, sau đó xóa đúng ID của lần chạy. Script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret; không xóa dữ liệu ngoài phạm vi fixture.
+
 ## Cấu trúc cơ bản
 
 ```text
@@ -308,6 +334,7 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 │   ├── controllers/
 │   │   ├── auth.controller.js
 │   │   ├── category.controller.js
+│   │   ├── favorite.controller.js
 │   │   ├── home.controller.js
 │   │   ├── listing.controller.js
 │   │   └── profile.controller.js
@@ -321,18 +348,21 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 │   │   └── notFound.middleware.js
 │   ├── models/
 │   │   ├── Category.js
+│   │   ├── Favorite.js
 │   │   ├── Listing.js
 │   │   └── User.js
 │   ├── routes/
 │   │   ├── adminCategory.routes.js
 │   │   ├── auth.routes.js
 │   │   ├── category.routes.js
+│   │   ├── favorite.routes.js
 │   │   ├── home.routes.js
 │   │   ├── listing.routes.js
 │   │   └── profile.routes.js
 │   ├── services/
 │   │   ├── auth.service.js
 │   │   ├── category.service.js
+│   │   ├── favorite.service.js
 │   │   ├── listing.service.js
 │   │   └── profile.service.js
 │   ├── utils/
@@ -344,10 +374,12 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 │   │   ├── fileStorage.js
 │   │   ├── formatPrice.js
 │   │   ├── normalizeListingQuery.js
-│   │   └── presentListing.js
+│   │   ├── presentListing.js
+│   │   └── safeReturnTo.js
 │   ├── validators/
 │   │   ├── auth.validator.js
 │   │   ├── category.validator.js
+│   │   ├── favorite.validator.js
 │   │   ├── listing.validator.js
 │   │   └── profile.validator.js
 │   ├── views/
@@ -357,6 +389,7 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 │   │   │   └── register.ejs
 │   │   ├── categories/
 │   │   ├── errors/
+│   │   ├── favorites/
 │   │   ├── layouts/
 │   │   ├── listings/
 │   │   │   └── _pagination.ejs
@@ -374,7 +407,8 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 │   ├── avatars/
 │   └── listings/
 ├── scripts/
-│   └── seedCategories.js
+│   ├── seedCategories.js
+│   └── verifyStep10E2e.js
 ├── .env.example
 ├── package.json
 ├── server.js
@@ -383,4 +417,4 @@ Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra sessi
 
 ## Trạng thái dự án
 
-Bước 9 đã hoàn thành hồ sơ cá nhân có bảo vệ đăng nhập, chỉnh sửa thông tin liên hệ, upload/thay/xóa avatar, placeholder, thống kê Listing và Listing gần đây. Dự án tiếp tục giữ nguyên auth, session, Category, Listing CRUD, upload ảnh, soft delete và tìm kiếm/phân trang. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Favorite, Chat hoặc thanh toán.
+Bước 10 đã hoàn thành Favorite cho Listing, gồm thêm/bỏ lưu idempotent, trang tin đã lưu có phân trang, trạng thái tim trên card và chi tiết, lọc soft-deleted Listing và bảo vệ return URL. Dự án tiếp tục giữ nguyên auth, session, Category, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Chat, Socket.IO, notification hoặc thanh toán.
