@@ -1,101 +1,142 @@
 <%- include('../partials/header') %>
 
-<section class="section-space">
-  <div class="container">
-    <a class="link-secondary d-inline-block mb-4" href="/listings">← Quay lại danh sách</a>
+<section class="listing-detail-page" aria-labelledby="listing-detail-title">
+  <div class="listing-detail-container">
+    <a class="listing-detail-back" href="/listings">Quay lại danh sách</a>
 
-    <% if (successMessage) { %>
-      <div class="alert alert-success" role="status"><%= successMessage %></div>
-    <% } %>
+    <div class="listing-detail-notices">
+      <% if (successMessage) { %>
+        <div class="alert alert-success listing-detail-alert" role="status"><%= successMessage %></div>
+      <% } %>
 
-    <% if (errors.general) { %>
-      <div class="alert alert-danger" role="alert"><%= errors.general %></div>
-    <% } %>
+      <% if (errors.general) { %>
+        <div class="alert alert-danger listing-detail-alert" role="alert"><%= errors.general %></div>
+      <% } %>
+    </div>
 
-    <div class="row g-5">
-      <div class="col-lg-6">
-        <% if (listing.hasImages) { %>
-          <div class="listing-gallery">
-            <img
-              class="listing-gallery-main"
-              src="<%= listing.images[0] %>"
-              alt="Ảnh chính của <%= listing.title %>"
-            >
-            <% if (listing.images.length > 1) { %>
-              <div class="row g-3 mt-1">
-                <% listing.images.slice(1).forEach((imagePath, index) => { %>
-                  <div class="col-6">
-                    <img
-                      class="listing-gallery-thumbnail"
-                      src="<%= imagePath %>"
-                      alt="Ảnh <%= index + 2 %> của <%= listing.title %>"
+    <div class="listing-detail-workbench">
+      <section class="listing-detail-gallery" aria-labelledby="listing-gallery-title">
+        <header class="listing-detail-gallery-header">
+          <h2 class="listing-detail-gallery-title" id="listing-gallery-title">Ảnh sản phẩm</h2>
+          <p class="listing-detail-image-count">
+            <%= listing.imageCount %> / 5 ảnh
+          </p>
+        </header>
+
+        <div class="listing-detail-image-grid">
+          <% if (listing.hasImages) { %>
+            <% listing.images.forEach((imagePath, index) => { %>
+              <figure
+                class="listing-detail-figure <%= index === 0 ? 'listing-detail-figure--primary' : 'listing-detail-figure--secondary' %>"
+                style="--gallery-index: <%= index %>"
+              >
+                <div class="listing-detail-media-frame">
+                  <img
+                    class="listing-detail-image"
+                    src="<%= imagePath %>"
+                    alt="Ảnh <%= index + 1 %> của <%= listing.title %>"
+                    <% if (index === 0) { %>
+                      fetchpriority="high"
+                    <% } else { %>
                       loading="lazy"
-                    >
-                  </div>
-                <% }); %>
+                    <% } %>
+                  >
+                </div>
+                <figcaption class="listing-detail-image-caption">
+                  Ảnh <%= index + 1 %> / <%= listing.imageCount %>
+                </figcaption>
+              </figure>
+            <% }); %>
+          <% } else { %>
+            <figure class="listing-detail-figure listing-detail-figure--placeholder" style="--gallery-index: 0">
+              <div class="listing-detail-media-frame">
+                <img
+                  class="listing-detail-image"
+                  src="<%= listing.primaryImage %>"
+                  alt="Bài đăng <%= listing.title %> chưa có ảnh"
+                  fetchpriority="high"
+                >
               </div>
-            <% } %>
-          </div>
-        <% } else { %>
-          <img
-            class="listing-gallery-main"
-            src="<%= listing.primaryImage %>"
-            alt="Bài đăng <%= listing.title %> chưa có ảnh"
-          >
-        <% } %>
-      </div>
-      <div class="col-lg-6">
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <span class="condition-badge"><%= listing.conditionLabel %></span>
-          <span class="badge <%= listing.status === 'active' ? 'text-bg-success' : listing.status === 'sold' ? 'text-bg-danger' : 'text-bg-secondary' %>">
+              <figcaption class="listing-detail-image-caption">Chưa có ảnh sản phẩm</figcaption>
+            </figure>
+          <% } %>
+        </div>
+      </section>
+
+      <aside class="listing-detail-inspector" aria-label="Thông tin sản phẩm">
+        <div class="listing-detail-status-row">
+          <span class="listing-detail-tag"><%= listing.conditionLabel %></span>
+          <span class="listing-detail-tag listing-detail-tag--<%= listing.status %>">
             <%= listing.statusLabel %>
           </span>
         </div>
-        <h1 class="display-6 fw-bold mb-3"><%= listing.title %></h1>
-        <p class="display-6 product-price mb-4"><%= listing.formattedPrice %></p>
 
-        <dl class="row listing-meta mb-4">
-          <dt class="col-sm-4">Danh mục</dt>
-          <dd class="col-sm-8">
-            <% if (listing.category) { %>
-              <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
-            <% } else { %>
-              Không còn tồn tại
-            <% } %>
-          </dd>
-          <dt class="col-sm-4">Địa điểm</dt>
-          <dd class="col-sm-8"><%= listing.location %></dd>
-          <dt class="col-sm-4">Ngày đăng</dt>
-          <dd class="col-sm-8"><%= listing.formattedCreatedAt %></dd>
+        <h1 class="listing-detail-title" id="listing-detail-title"><%= listing.title %></h1>
+        <p class="listing-detail-price"><%= listing.formattedPrice %></p>
+
+        <dl class="listing-detail-meta">
+          <div class="listing-detail-meta-group">
+            <dt>Danh mục</dt>
+            <dd>
+              <% if (listing.category) { %>
+                <a href="/categories/<%= listing.category.slug %>"><%= listing.category.name %></a>
+              <% } else { %>
+                Không còn tồn tại
+              <% } %>
+            </dd>
+          </div>
+          <div class="listing-detail-meta-group">
+            <dt>Địa điểm</dt>
+            <dd><%= listing.location %></dd>
+          </div>
+          <div class="listing-detail-meta-group">
+            <dt>Ngày đăng</dt>
+            <dd><%= listing.formattedCreatedAt %></dd>
+          </div>
         </dl>
 
-        <div class="seller-card border rounded-4 p-3 mb-4">
-          <p class="small text-uppercase fw-bold text-secondary mb-2">Người bán</p>
-          <div class="d-flex align-items-center gap-3">
+        <section class="listing-detail-seller" aria-labelledby="listing-seller-title">
+          <h2 class="listing-detail-seller-title" id="listing-seller-title">Thông tin người bán</h2>
+          <div class="listing-detail-seller-body">
             <% if (listing.seller && listing.sellerAvatar) { %>
-              <img class="seller-avatar" src="<%= listing.sellerAvatar %>" alt="Ảnh đại diện người bán">
+              <img
+                class="listing-detail-seller-avatar"
+                src="<%= listing.sellerAvatar %>"
+                alt="Ảnh đại diện của <%= listing.seller.name %>"
+              >
             <% } else { %>
-              <div class="seller-avatar-placeholder" aria-hidden="true">N</div>
+              <div class="listing-detail-seller-placeholder" aria-hidden="true">N</div>
             <% } %>
-            <div>
-              <p class="fw-bold mb-0"><%= listing.seller ? listing.seller.name : 'Người dùng không còn tồn tại' %></p>
+            <div class="listing-detail-seller-copy">
+              <p class="listing-detail-seller-label">Người bán</p>
+              <p class="listing-detail-seller-name">
+                <%= listing.seller ? listing.seller.name : 'Người dùng không còn tồn tại' %>
+              </p>
               <% if (listing.seller && listing.seller.phone) { %>
-                <p class="text-secondary mb-0"><%= listing.seller.phone %></p>
+                <p class="listing-detail-seller-phone"><%= listing.seller.phone %></p>
               <% } %>
             </div>
           </div>
-        </div>
+        </section>
 
         <% if (canManage) { %>
-          <%- include('_actions', { listing }) %>
+          <section class="listing-detail-owner" aria-labelledby="listing-owner-title">
+            <h2 class="listing-detail-owner-title" id="listing-owner-title">Quản lý bài đăng</h2>
+            <p class="listing-detail-owner-copy">
+              <%= isOwner ? 'Bạn là người đăng sản phẩm này.' : 'Bạn đang quản lý bài đăng với quyền quản trị.' %>
+            </p>
+            <div class="listing-detail-owner-actions">
+              <%- include('_actions', { listing }) %>
+            </div>
+          </section>
         <% } %>
-      </div>
+      </aside>
     </div>
 
-    <div class="bg-white border rounded-4 p-4 p-md-5 mt-5">
-      <h2 class="h4 fw-bold mb-3">Mô tả sản phẩm</h2>
-      <p class="listing-description text-secondary mb-0"><%= listing.description %></p>
-    </div>
+    <section class="listing-detail-description" aria-labelledby="listing-description-title">
+      <h2 class="listing-detail-section-title" id="listing-description-title">Mô tả sản phẩm</h2>
+      <p class="listing-detail-description-copy"><%= listing.description %></p>
+    </section>
   </div>
 </section>
 

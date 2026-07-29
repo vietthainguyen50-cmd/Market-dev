@@ -277,6 +277,26 @@ Khi validation hoặc cập nhật database thất bại, avatar mới được 
 
 Thống kê hồ sơ dùng `countDocuments` riêng cho `active`, `sold` và `hidden`, sau đó tính tổng từ ba giá trị. Listing gần đây được truy vấn theo đúng seller hiện tại, sắp xếp mới nhất và giới hạn 4. Bước này chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Favorite hoặc Chat.
 
+### Kiểm thử hồ sơ
+
+Dự án dùng test runner có sẵn của Node.js nên không cần cài thêm package kiểm thử:
+
+```bash
+npm test
+```
+
+Bộ test kiểm tra validation name/phone/address, whitelist field cập nhật, bảo vệ route, thống kê Listing theo seller, Listing gần đây, Multer cho JPG/PNG/WEBP, giới hạn 2 MB, một file duy nhất, cleanup khi validation hoặc database lỗi, thay/xóa avatar, UUID public path, path traversal, placeholder và hồi quy auth/Category/Listing/search. Fixture avatar dùng UUID riêng và được xóa sau từng test; test không xóa ảnh Listing hoặc toàn bộ thư mục `uploads/`.
+
+URL avatar đưa ra giao diện chỉ được chấp nhận khi khớp public path managed `/uploads/avatars/<uuid>.<extension>`; dữ liệu path khác sẽ hiển thị placeholder. Lỗi upload dự kiến trả form 422, còn lỗi filesystem hoặc Multer không dự kiến được chuyển cho error middleware thay vì bị che thành lỗi validation.
+
+Khi `.env` đang trỏ tới database development dành cho kiểm thử, có thể chạy E2E profile:
+
+```bash
+npm run test:e2e:profile
+```
+
+Verifier tạo một tài khoản `example.test` ngẫu nhiên, kiểm tra session/profile/avatar trên HTTP và MongoDB thật, sau đó xóa đúng User, session và avatar của lần chạy đó. Script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret; không dùng `deleteMany({})`, không xóa Listing và không giữ dữ liệu test.
+
 ## Cấu trúc cơ bản
 
 ```text

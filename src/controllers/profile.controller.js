@@ -25,17 +25,8 @@ const getOldInput = (data = {}) => ({
   address: typeof data.address === 'string' ? data.address : '',
 });
 
-const getSafeAvatarUrl = (avatar) => {
-  if (isManagedAvatarPath(avatar)) {
-    return avatar;
-  }
-
-  if (typeof avatar === 'string' && /^https?:\/\//i.test(avatar.trim())) {
-    return avatar.trim();
-  }
-
-  return DEFAULT_AVATAR;
-};
+const getSafeAvatarUrl = (avatar) =>
+  isManagedAvatarPath(avatar) ? avatar : DEFAULT_AVATAR;
 
 const presentProfileUser = (profileUser) => ({
   ...profileUser,
@@ -107,6 +98,7 @@ const updateProfile = async (req, res, next) => {
   const errors = getFieldErrors(req);
   const oldInput = getOldInput(req.body);
   const retryAvatar = Boolean(req.file || req.avatarUploadError);
+  let profileUpdated = false;
 
   if (req.avatarUploadError) {
     errors.avatar = req.avatarUploadError.message;
@@ -143,6 +135,7 @@ const updateProfile = async (req, res, next) => {
         address: req.body.address,
         avatar: finalAvatar,
       });
+      profileUpdated = true;
     } catch (error) {
       await deleteStoredAvatar(newAvatarPath);
       throw error;
@@ -157,6 +150,10 @@ const updateProfile = async (req, res, next) => {
 
     return res.redirect(303, '/profile?updated=1');
   } catch (error) {
+    if (!profileUpdated) {
+      await deleteStoredAvatar(newAvatarPath);
+    }
+
     return next(error);
   }
 };

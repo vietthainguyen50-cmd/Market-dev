@@ -1,4 +1,7 @@
 const User = require('../models/User');
+const { isManagedAvatarPath } = require('../utils/avatarStorage');
+
+const DEFAULT_AVATAR = '/images/default-avatar.svg';
 
 const loadCurrentUser = async (req, res, next) => {
   req.user = null;
@@ -17,6 +20,9 @@ const loadCurrentUser = async (req, res, next) => {
       .lean();
 
     if (user?.status === 'active') {
+      user.avatarUrl = isManagedAvatarPath(user.avatar)
+        ? user.avatar
+        : DEFAULT_AVATAR;
       req.user = user;
       res.locals.currentUser = user;
       res.locals.isAuthenticated = true;

@@ -14,6 +14,7 @@ const {
 } = require('../utils/createPagination');
 const normalizeListingQuery = require('../utils/normalizeListingQuery');
 const presentListing = require('../utils/presentListing');
+const { isManagedAvatarPath } = require('../utils/avatarStorage');
 
 const CREATED_MESSAGE = 'Tạo bài đăng thành công.';
 const UPDATED_MESSAGE = 'Cập nhật bài đăng thành công.';
@@ -53,17 +54,8 @@ const renderNotFound = (req, res) =>
 
 const getSellerId = (listing) => listing.seller?._id || listing.seller;
 
-const getSafeAvatar = (avatar) => {
-  if (typeof avatar !== 'string') {
-    return '';
-  }
-
-  const value = avatar.trim();
-  const isLocalPath = value.startsWith('/') && !value.startsWith('//');
-  const isHttpUrl = /^https?:\/\//i.test(value);
-
-  return isLocalPath || isHttpUrl ? value : '';
-};
+const getSafeAvatar = (avatar) =>
+  isManagedAvatarPath(avatar) ? avatar : '';
 
 const isListingOwner = (listing, user) =>
   Boolean(user && getSellerId(listing)?.toString() === user._id.toString());

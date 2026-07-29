@@ -14,6 +14,12 @@ const AVATAR_MIME_TYPE_EXTENSIONS = {
   'image/png': '.png',
   'image/webp': '.webp',
 };
+const EXPECTED_AVATAR_UPLOAD_ERROR_CODES = new Set([
+  'LIMIT_FILE_SIZE',
+  'LIMIT_FILE_COUNT',
+  'LIMIT_UNEXPECTED_FILE',
+  'INVALID_AVATAR_TYPE',
+]);
 
 fs.mkdirSync(AVATAR_UPLOAD_DIRECTORY, {
   recursive: true,
@@ -76,6 +82,11 @@ const uploadAvatar = (req, res, next) => {
     return deleteStoredAvatar(storedPath)
       .then(() => {
         req.file = undefined;
+
+        if (!EXPECTED_AVATAR_UPLOAD_ERROR_CODES.has(error.code)) {
+          return next(error);
+        }
+
         req.avatarUploadError = {
           code: error.code || 'AVATAR_UPLOAD_ERROR',
           message: getAvatarUploadErrorMessage(error),
