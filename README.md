@@ -323,6 +323,32 @@ npm run test:e2e:favorite
 
 Verifier tạo User, Category, Listing và Favorite có nhãn Step 10 riêng, kiểm tra route HTTP/session cùng MongoDB thật, sau đó xóa đúng ID của lần chạy. Script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret; không xóa dữ liệu ngoài phạm vi fixture.
 
+## Nhắn tin giữa người mua và người bán
+
+Bước 11 bổ sung nhắn tin văn bản riêng tư theo từng Listing. Mỗi `Conversation` gắn đúng một `listing`, `buyer` và `seller`; unique index trên ba trường này ngăn tạo cuộc trò chuyện trùng. `Message` lưu `conversation`, `sender`, `recipient`, nội dung plain text, `readAt` và timestamps. Metadata `lastMessagePreview`, `lastMessageAt` và `lastSender` giúp sắp xếp danh sách hội thoại mà không phải tải lại toàn bộ Message.
+
+Các route đều yêu cầu đăng nhập:
+
+- `GET /messages`: danh sách Conversation của User hiện tại, tối đa 20 mục mỗi trang.
+- `GET /messages/:conversationId`: lịch sử Message, tối đa 50 tin mỗi trang.
+- `POST /listings/:id/conversations`: tạo hoặc mở lại Conversation theo Listing.
+- `POST /messages/:conversationId`: gửi tin nhắn văn bản tối đa 2.000 ký tự.
+
+Buyer luôn lấy từ `req.user`, seller luôn lấy từ Listing, còn sender và recipient được server suy ra từ hai participant. Client không được chọn các danh tính này. User thứ ba và admin không phải participant đều nhận 404. Listing `active` cho phép tạo và gửi; Listing `sold` chỉ cho phép tiếp tục Conversation đã có; Listing `hidden` vẫn giữ lịch sử cho participant nhưng chuyển sang chỉ đọc. Nội dung được trim, lưu dưới dạng plain text và render bằng EJS escaped output để ngăn stored XSS.
+
+Việc tạo Message và cập nhật metadata Conversation chạy trong một MongoDB transaction. Nếu metadata không cập nhật được thì Message cũng rollback. Unread count chỉ đếm Message có `recipient` là User hiện tại và `readAt: null`; khi participant mở Conversation, ứng dụng chỉ đánh dấu Message gửi đến họ trong đúng Conversation đó. Header hiển thị tổng unread và rút gọn số lớn hơn 99 thành `99+`.
+
+Giao diện dùng Workbench NTT Cobalt và các token sẵn có trong `tokens.css`. Trang danh sách hiển thị người còn lại, Listing, thumbnail/placeholder, trạng thái, preview và unread badge. Trang chi tiết hiển thị Message từ cũ đến mới trong từng trang, giữ line break bằng `white-space: pre-wrap`, có focus-visible, reduced-motion và bố cục mobile-first.
+
+Chạy unit test và E2E Message:
+
+```bash
+npm test
+npm run test:e2e:messages
+```
+
+Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợp, gồm privacy participant, active/sold/hidden, duplicate/concurrent Conversation, transaction rollback, XSS, pagination, unread/mark-read và các hồi quy Bước 1–10. Fixture có nhãn ngẫu nhiên được xóa theo đúng ID sau khi chạy; script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret.
+
 ## Cấu trúc cơ bản
 
 ```text
@@ -417,4 +443,4 @@ Verifier tạo User, Category, Listing và Favorite có nhãn Step 10 riêng, ki
 
 ## Trạng thái dự án
 
-Bước 10 đã hoàn thành Favorite cho Listing, gồm thêm/bỏ lưu idempotent, trang tin đã lưu có phân trang, trạng thái tim trên card và chi tiết, lọc soft-deleted Listing và bảo vệ return URL. Dự án tiếp tục giữ nguyên auth, session, Category, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Chat, Socket.IO, notification hoặc thanh toán.
+Bước 11 đã hoàn thành nhắn tin văn bản riêng tư giữa buyer và seller theo Listing, gồm Conversation duy nhất, Message transaction-safe, participant authorization, unread/mark-read, phân trang và giao diện Workbench responsive. Dự án tiếp tục giữ nguyên Favorite, auth, session, Category, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Socket.IO/WebSocket, notification, gửi ảnh/file trong chat hoặc thanh toán.

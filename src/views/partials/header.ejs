@@ -58,6 +58,23 @@
                 <a class="nav-link" href="/favorites">Tin đã lưu</a>
               </li>
               <li class="nav-item">
+                <a
+                  class="nav-link nav-messages-link"
+                  href="/messages"
+                  aria-label="Tin nhắn<%= unreadMessageCount > 0 ? `, ${unreadMessageCount > 99 ? 'trên 99' : unreadMessageCount} tin chưa đọc` : '' %>"
+                >
+                  <span>Tin nhắn</span>
+                  <% if (unreadMessageCount > 0) { %>
+                    <span
+                      class="nav-unread-badge"
+                      aria-label="<%= unreadMessageCount > 99 ? 'Trên 99 tin chưa đọc' : `${unreadMessageCount} tin chưa đọc` %>"
+                    >
+                      <%= unreadMessageCount > 99 ? '99+' : unreadMessageCount %>
+                    </span>
+                  <% } %>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link nav-profile-link" href="/profile">
                   <img
                     class="header-avatar"

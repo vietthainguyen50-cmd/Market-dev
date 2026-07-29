@@ -1,0 +1,110 @@
+<%- include('../partials/header', { pageStyles: ['/css/messages.css'] }) %>
+
+<section class="section-space messages-page" aria-labelledby="messages-title">
+  <div class="container messages-container">
+    <div class="page-heading messages-page-heading">
+      <div>
+        <h1 class="mb-2" id="messages-title">Tin nhắn</h1>
+        <p class="text-secondary mb-0">
+          Theo dõi các cuộc trao đổi giữa bạn và người mua hoặc người bán.
+        </p>
+      </div>
+      <a class="btn btn-outline-secondary" href="/listings">
+        Khám phá sản phẩm
+      </a>
+    </div>
+
+    <% if (errors.page || errors.general) { %>
+      <div class="alert alert-danger messages-alert" role="alert">
+        <%= errors.page || errors.general %>
+      </div>
+    <% } else { %>
+      <div class="messages-summary">
+        <p class="mb-0 fw-semibold" data-conversation-total="<%= totalItems %>">
+          <%= totalItems %> cuộc trò chuyện
+        </p>
+        <% if (pagination.totalPages > 1) { %>
+          <p class="mb-0 text-secondary">
+            Trang <%= currentPage %> / <%= pagination.totalPages %>
+          </p>
+        <% } %>
+      </div>
+
+      <% if (conversations.length > 0) { %>
+        <div class="conversation-list">
+          <% conversations.forEach((conversation) => { %>
+            <article
+              class="conversation-card <%= conversation.hasUnread ? 'has-unread' : '' %>"
+              data-conversation
+            >
+              <a
+                class="conversation-card-link"
+                href="<%= conversation.detailUrl %>"
+                aria-label="Mở trò chuyện với <%= conversation.otherParticipant.name %> về <%= conversation.listing.title %><%= conversation.hasUnread ? `, ${conversation.unreadCount} tin chưa đọc` : '' %>"
+              >
+                <img
+                  class="conversation-listing-image"
+                  src="<%= conversation.listing.primaryImage %>"
+                  alt="Ảnh bài đăng <%= conversation.listing.title %>"
+                  width="160"
+                  height="120"
+                  loading="lazy"
+                >
+
+                <div class="conversation-card-body">
+                  <div class="conversation-participant">
+                    <img
+                      class="conversation-avatar"
+                      src="<%= conversation.otherParticipant.avatarUrl %>"
+                      alt=""
+                      width="44"
+                      height="44"
+                      loading="lazy"
+                    >
+                    <div>
+                      <h2><%= conversation.otherParticipant.name %></h2>
+                      <p><%= conversation.listing.title %></p>
+                    </div>
+                  </div>
+
+                  <p class="conversation-preview">
+                    <%= conversation.lastMessagePreview %>
+                  </p>
+
+                  <div class="conversation-card-meta">
+                    <span class="badge status-badge status-badge--<%= conversation.listing.status %>">
+                      <%= conversation.listing.statusLabel %>
+                    </span>
+                    <time><%= conversation.formattedLastMessageAt %></time>
+                    <% if (conversation.hasUnread) { %>
+                      <span
+                        class="conversation-unread-badge"
+                        aria-label="<%= conversation.unreadCount %> tin chưa đọc"
+                      >
+                        <%= conversation.unreadCount > 99 ? '99+' : conversation.unreadCount %>
+                        <span class="visually-hidden">tin chưa đọc</span>
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
+              </a>
+            </article>
+          <% }); %>
+        </div>
+
+        <%- include('../listings/_pagination', { pagination }) %>
+      <% } else { %>
+        <div class="messages-empty-state" role="status">
+          <div class="messages-empty-mark" aria-hidden="true">···</div>
+          <h2>Bạn chưa có cuộc trò chuyện nào.</h2>
+          <p>
+            Mở một sản phẩm đang bán và nhắn cho người bán để bắt đầu trao đổi.
+          </p>
+          <a class="btn btn-primary" href="/listings">Khám phá sản phẩm</a>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

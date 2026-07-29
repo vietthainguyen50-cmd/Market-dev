@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const categoryService = require('../services/category.service');
+const conversationService = require('../services/conversation.service');
 const favoriteService = require('../services/favorite.service');
 const listingService = require('../services/listing.service');
 const { MAX_LISTING_IMAGES } = require('../middlewares/upload.middleware');
@@ -144,6 +145,7 @@ const renderListingDetail = (req, res, listing, options = {}) => {
     errors: options.errors || {},
     successMessage: options.successMessage || '',
     currentUrl: req.originalUrl,
+    messageConversationId: options.messageConversationId || '',
   });
 };
 
@@ -281,14 +283,25 @@ const showListing = async (req, res, next) => {
     }
 
     const isOwner = isListingOwner(listing, req.user);
-    const isFavorited =
-      req.user && !isOwner && listing.status !== 'hidden'
-        ? await favoriteService.isListingFavorited(req.user._id, listing._id)
-        : false;
+    let isFavorited = false;
+    let existingConversation = null;
+
+    if (req.user && !isOwner && listing.status !== 'hidden') {
+      [isFavorited, existingConversation] = await Promise.all([
+        favoriteService.isListingFavorited(req.user._id, listing._id),
+        conversationService.findExistingConversationForListing(
+          listing._id,
+          req.user._id,
+          getSellerId(listing),
+        ),
+      ]);
+    }
 
     return renderListingDetail(req, res, listing, {
       successMessage: getDetailSuccessMessage(req.query),
       isFavorited,
+      messageConversationId:
+        existingConversation?._id?.toString() || '',
     });
   } catch (error) {
     return next(error);

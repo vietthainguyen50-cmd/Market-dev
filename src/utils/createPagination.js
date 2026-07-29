@@ -12,6 +12,19 @@ const buildFavoritesUrl = (page) =>
     ? `/favorites?page=${page}`
     : '/favorites';
 
+const buildMessagesUrl = (page) =>
+  Number.isSafeInteger(page) && page > 1
+    ? `/messages?page=${page}`
+    : '/messages';
+
+const buildConversationMessagesUrl = (conversationId, page) => {
+  const baseUrl = `/messages/${encodeURIComponent(String(conversationId))}`;
+
+  return Number.isSafeInteger(page) && page > 1
+    ? `${baseUrl}?page=${page}`
+    : baseUrl;
+};
+
 const createPaginationLinks = (pagination, buildUrl) => {
   const { page, totalPages, hasPrev, hasNext } = pagination;
   const halfWindow = Math.floor(PAGE_WINDOW_SIZE / 2);
@@ -46,9 +59,24 @@ const createPagination = (pagination, filters) =>
 const createFavoritesPagination = (pagination) =>
   createPaginationLinks(pagination, buildFavoritesUrl);
 
+const createMessagesPagination = (pagination) =>
+  createPaginationLinks(pagination, buildMessagesUrl);
+
+const createConversationMessagesPagination = (
+  pagination,
+  conversationId,
+) =>
+  createPaginationLinks(pagination, (page) =>
+    buildConversationMessagesUrl(conversationId, page),
+  );
+
 module.exports = {
+  buildConversationMessagesUrl,
   buildFavoritesUrl,
   buildListingUrl,
+  buildMessagesUrl,
+  createConversationMessagesPagination,
   createFavoritesPagination,
+  createMessagesPagination,
   createPagination,
 };

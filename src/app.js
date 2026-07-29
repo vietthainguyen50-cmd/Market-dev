@@ -11,8 +11,12 @@ const categoryRoutes = require('./routes/category.routes');
 const favoriteRoutes = require('./routes/favorite.routes');
 const homeRoutes = require('./routes/home.routes');
 const listingRoutes = require('./routes/listing.routes');
+const messageRoutes = require('./routes/message.routes');
 const profileRoutes = require('./routes/profile.routes');
 const { loadCurrentUser } = require('./middlewares/auth.middleware');
+const {
+  loadUnreadMessageCount,
+} = require('./middlewares/message.middleware');
 const notFoundMiddleware = require('./middlewares/notFound.middleware');
 const errorMiddleware = require('./middlewares/error.middleware');
 
@@ -63,10 +67,12 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(createSessionMiddleware());
 app.use(loadCurrentUser);
+app.use(loadUnreadMessageCount);
 
 app.use('/', authRoutes);
 app.use('/', profileRoutes);
 app.use('/', favoriteRoutes);
+app.use('/', messageRoutes);
 app.use('/', listingRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/admin/categories', adminCategoryRoutes);

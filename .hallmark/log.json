@@ -1,6 +1,14 @@
 [
   {
     "date": "2026-07-29",
+    "scope": "app-page",
+    "macrostructure": "Workbench / Conversation ledger",
+    "theme": "NTT Cobalt (design.md locked)",
+    "enrichment": "Listing and participant avatar context only",
+    "brief": "Buyer-seller messaging by Listing"
+  },
+  {
+    "date": "2026-07-29",
     "scope": "page",
     "macrostructure": "Workbench / Product showroom + commerce inspector",
     "theme": "studied-DNA structure / NTT Cobalt tokens (design.md locked)",

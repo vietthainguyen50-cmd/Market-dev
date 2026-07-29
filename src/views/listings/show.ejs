@@ -133,14 +133,51 @@
             <p class="listing-detail-price"><%= listing.formattedPrice %></p>
           </div>
 
-          <div class="listing-detail-favorite-action">
-            <%- include('../favorites/_favorite-button', {
-              listing,
-              currentUser,
-              returnTo: currentUrl,
-              compact: false,
-              isFavorited: listing.isFavorited
-            }) %>
+          <div class="listing-detail-contact-actions">
+            <div class="listing-detail-favorite-action">
+              <%- include('../favorites/_favorite-button', {
+                listing,
+                currentUser,
+                returnTo: currentUrl,
+                compact: false,
+                isFavorited: listing.isFavorited
+              }) %>
+            </div>
+
+            <% if (!isOwner) { %>
+              <div class="listing-detail-message-action">
+                <% if (messageConversationId) { %>
+                  <a
+                    class="btn btn-primary"
+                    href="/messages/<%= messageConversationId %>#latest"
+                  >
+                    Tiếp tục trò chuyện
+                  </a>
+                <% } else if (listing.status === 'active' && currentUser) { %>
+                  <form method="POST" action="/listings/<%= listing._id %>/conversations">
+                    <button class="btn btn-primary" type="submit">
+                      Nhắn tin cho người bán
+                    </button>
+                  </form>
+                <% } else if (listing.status === 'active') { %>
+                  <a class="btn btn-primary" href="/login">
+                    Đăng nhập để nhắn tin
+                  </a>
+                <% } else if (listing.status === 'sold') { %>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    disabled
+                    aria-describedby="listing-sold-message"
+                  >
+                    Bài đăng đã bán
+                  </button>
+                  <p class="listing-detail-action-note" id="listing-sold-message">
+                    Chỉ cuộc trò chuyện đã có mới tiếp tục được.
+                  </p>
+                <% } %>
+              </div>
+            <% } %>
           </div>
 
           <dl class="listing-detail-meta listing-detail-summary-meta">

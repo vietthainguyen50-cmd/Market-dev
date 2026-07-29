@@ -803,8 +803,10 @@ body {
   line-height: 1;
 }
 
-.listing-detail-favorite-action {
+.listing-detail-contact-actions {
+  display: grid;
   margin-block-start: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .listing-detail-favorite-action .favorite-form,
@@ -815,6 +817,23 @@ body {
 
 .listing-detail-favorite-action .favorite-button--detail {
   min-height: var(--control-height);
+}
+
+.listing-detail-message-action,
+.listing-detail-message-action form,
+.listing-detail-message-action .btn {
+  width: 100%;
+}
+
+.listing-detail-message-action form {
+  margin: 0;
+}
+
+.listing-detail-action-note {
+  margin: var(--space-xs) 0 0;
+  overflow-wrap: anywhere;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
 }
 
 .listing-detail-summary-meta {

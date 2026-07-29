@@ -1,0 +1,152 @@
+<%- include('../partials/header', { pageStyles: ['/css/messages.css'] }) %>
+
+<section class="section-space message-detail-page" aria-labelledby="conversation-title">
+  <div class="container message-detail-container">
+    <nav class="message-back-nav" aria-label="Điều hướng tin nhắn">
+      <a href="/messages">← Tất cả tin nhắn</a>
+    </nav>
+
+    <header class="conversation-header">
+      <div class="conversation-header-person">
+        <img
+          class="conversation-header-avatar"
+          src="<%= conversation.otherParticipant.avatarUrl %>"
+          alt="Ảnh đại diện của <%= conversation.otherParticipant.name %>"
+          width="56"
+          height="56"
+        >
+        <div>
+          <p>Trò chuyện với</p>
+          <h1 id="conversation-title"><%= conversation.otherParticipant.name %></h1>
+        </div>
+      </div>
+      <a class="btn btn-outline-secondary" href="/messages">Danh sách tin nhắn</a>
+    </header>
+
+    <section class="conversation-listing-context" aria-labelledby="conversation-listing-title">
+      <img
+        class="conversation-context-image"
+        src="<%= conversation.listing.primaryImage %>"
+        alt="Ảnh bài đăng <%= conversation.listing.title %>"
+        width="160"
+        height="120"
+      >
+      <div class="conversation-context-copy">
+        <div class="conversation-context-heading">
+          <h2 id="conversation-listing-title"><%= conversation.listing.title %></h2>
+          <span class="badge status-badge status-badge--<%= conversation.listing.status %>">
+            <%= conversation.listing.statusLabel %>
+          </span>
+        </div>
+        <% if (conversation.listing.formattedPrice) { %>
+          <p class="conversation-context-price">
+            <%= conversation.listing.formattedPrice %>
+          </p>
+        <% } %>
+        <% if (conversation.listing.detailUrl) { %>
+          <a href="<%= conversation.listing.detailUrl %>">Xem chi tiết sản phẩm</a>
+        <% } else { %>
+          <p class="conversation-hidden-note">Bài đăng đã ẩn · lịch sử trò chuyện vẫn được giữ.</p>
+        <% } %>
+      </div>
+    </section>
+
+    <% if (errors.page || errors.general) { %>
+      <div class="alert alert-danger messages-alert" role="alert">
+        <%= errors.page || errors.general %>
+      </div>
+    <% } %>
+
+    <div class="message-page-navigation" aria-label="Phân trang tin nhắn">
+      <% if (pagination.nextUrl) { %>
+        <a class="btn btn-outline-secondary" href="<%= pagination.nextUrl %>">
+          Xem tin nhắn cũ hơn
+        </a>
+      <% } %>
+      <% if (pagination.previousUrl) { %>
+        <a class="btn btn-outline-secondary" href="<%= pagination.previousUrl %>#latest">
+          Xem tin nhắn mới hơn
+        </a>
+      <% } %>
+    </div>
+
+    <section class="message-thread" aria-label="Nội dung cuộc trò chuyện">
+      <% if (messages.length > 0) { %>
+        <ol class="message-list">
+          <% messages.forEach((message) => { %>
+            <li class="message-row <%= message.isMine ? 'is-mine' : 'is-other' %>">
+              <% if (!message.isMine) { %>
+                <img
+                  class="message-avatar"
+                  src="<%= message.senderAvatarUrl %>"
+                  alt=""
+                  width="36"
+                  height="36"
+                  loading="lazy"
+                >
+              <% } %>
+              <article class="message-bubble <%= message.isMine ? 'message-bubble--mine' : 'message-bubble--other' %>">
+                <p class="message-sender-label">
+                  <%= message.isMine ? 'Bạn' : message.senderName %>
+                </p>
+                <p class="message-content"><%= message.content %></p>
+                <footer class="message-meta">
+                  <time><%= message.formattedCreatedAt %></time>
+                  <% if (message.isMine) { %>
+                    <span><%= message.isRead ? 'Đã xem' : 'Đã gửi' %></span>
+                  <% } %>
+                </footer>
+              </article>
+            </li>
+          <% }); %>
+        </ol>
+      <% } else { %>
+        <div class="message-thread-empty" role="status">
+          <h2>Chưa có tin nhắn.</h2>
+          <p>Gửi lời nhắn đầu tiên để bắt đầu trao đổi về sản phẩm này.</p>
+        </div>
+      <% } %>
+      <div id="latest" tabindex="-1" aria-hidden="true"></div>
+    </section>
+
+    <% if (canSend) { %>
+      <form
+        class="message-compose-form"
+        method="POST"
+        action="/messages/<%= conversation.id %>"
+      >
+        <div class="message-compose-heading">
+          <label for="messageContent">Nội dung tin nhắn</label>
+          <span>Tối đa 2.000 ký tự</span>
+        </div>
+        <textarea
+          class="form-control <%= errors.content ? 'is-invalid' : '' %>"
+          id="messageContent"
+          name="content"
+          rows="4"
+          maxlength="2000"
+          required
+          aria-required="true"
+          aria-invalid="<%= errors.content ? 'true' : 'false' %>"
+          aria-describedby="messageContentFeedback"
+          placeholder="Hỏi người bán về tình trạng hoặc cách nhận sản phẩm"
+        ><%= oldInput.content %></textarea>
+        <div
+          class="<%= errors.content ? 'invalid-feedback' : 'form-text' %> field-feedback-slot"
+          id="messageContentFeedback"
+        ><%= errors.content || '' %></div>
+        <div class="message-compose-actions">
+          <p>Chỉ gửi nội dung văn bản. Không chia sẻ thông tin nhạy cảm.</p>
+          <button class="btn btn-primary" type="submit">Gửi tin nhắn</button>
+        </div>
+      </form>
+    <% } else { %>
+      <div class="message-readonly-notice" role="status">
+        <h2>Cuộc trò chuyện đang ở chế độ xem.</h2>
+        <p>Bài đăng đã được ẩn nên không thể gửi tin nhắn mới.</p>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
