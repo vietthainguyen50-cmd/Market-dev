@@ -21,7 +21,7 @@
     <% } %>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top site-navbar" aria-label="Điều hướng chính">
+    <nav class="navbar navbar-expand-xl navbar-light sticky-top site-navbar" aria-label="Điều hướng chính">
       <div class="container site-navbar-inner">
         <a class="navbar-brand site-wordmark" href="/" aria-label="NTT Marketplace — Trang chủ">
           <span class="brand-mark" aria-hidden="true">N</span>
@@ -48,7 +48,7 @@
             <% if (isAuthenticated) { %>
               <% if (currentUser.role === 'admin') { %>
                 <li class="nav-item">
-                  <a class="nav-link" href="/admin/categories">Quản trị</a>
+                  <a class="nav-link" href="/admin">Quản trị</a>
                 </li>
               <% } %>
               <li class="nav-item">

@@ -3,6 +3,12 @@ const { validationResult } = require('express-validator');
 const categoryService = require('../services/category.service');
 const favoriteService = require('../services/favorite.service');
 const listingService = require('../services/listing.service');
+const {
+  deleteStoredCategoryImage,
+  getCategoryImageUrl,
+  isManagedCategoryImagePath,
+  uploadedCategoryImageToPublicPath,
+} = require('../utils/categoryImageStorage');
 const presentListing = require('../utils/presentListing');
 
 const CREATED_MESSAGE = 'Tạo danh mục thành công.';
@@ -21,9 +27,18 @@ const getOldInput = (data = {}) => ({
   name: typeof data.name === 'string' ? data.name : '',
   description:
     typeof data.description === 'string' ? data.description : '',
-  image: typeof data.image === 'string' ? data.image : '',
   status: typeof data.status === 'string' ? data.status : 'active',
 });
+
+const presentCategory = (category) => {
+  const imageUrl = getCategoryImageUrl(category);
+
+  return {
+    ...category,
+    hasManagedImage: Boolean(imageUrl),
+    imageUrl,
+  };
+};
 
 const renderNotFound = (req, res) =>
   res.status(404).render('errors/404', {
@@ -49,11 +64,11 @@ const getSuccessMessage = (query = {}) => {
 
 const formatAdminCategories = (categories) =>
   categories.map((category) => ({
-    ...category,
+    ...presentCategory(category),
     descriptionPreview:
-      category.description.length > 80
+      category.description?.length > 80
         ? `${category.description.slice(0, 80)}…`
-        : category.description,
+        : category.description || '',
     formattedCreatedAt: new Intl.DateTimeFormat('vi-VN').format(
       category.createdAt,
     ),
@@ -76,7 +91,8 @@ const isDuplicateError = (error) =>
 
 const isInvalidCategoryError = (error) =>
   error.code === categoryService.CATEGORY_INVALID_SLUG ||
-  error.code === categoryService.CATEGORY_INVALID_STATUS;
+  error.code === categoryService.CATEGORY_INVALID_STATUS ||
+  error.code === categoryService.CATEGORY_INVALID_IMAGE;
 
 const listCategories = async (req, res, next) => {
   try {
@@ -84,7 +100,7 @@ const listCategories = async (req, res, next) => {
 
     return res.render('categories/index', {
       pageTitle: 'Danh mục sản phẩm',
-      categories,
+      categories: categories.map(presentCategory),
     });
   } catch (error) {
     return next(error);
@@ -107,7 +123,7 @@ const showCategory = async (req, res, next) => {
 
     return res.render('categories/show', {
       pageTitle: category.name,
-      category,
+      category: presentCategory(category),
       listings: listings.map((listing) =>
         presentListing(listing, {
           isFavorited: favoriteListingIds.has(listing._id.toString()),
@@ -133,17 +149,26 @@ const listAdminCategories = async (req, res, next) => {
 const showCreateCategoryForm = (req, res) =>
   res.render('admin/categories/create', {
     pageTitle: 'Thêm danh mục',
+    category: presentCategory({ image: '' }),
     errors: {},
     oldInput: getOldInput(),
   });
 
 const createCategory = async (req, res, next) => {
+  const newImagePath = uploadedCategoryImageToPublicPath(req.file);
   const errors = getFieldErrors(req);
   const oldInput = getOldInput(req.body);
 
+  if (req.categoryImageUploadError) {
+    errors.image = req.categoryImageUploadError.message;
+  }
+
   if (Object.keys(errors).length > 0) {
+    await deleteStoredCategoryImage(newImagePath);
+
     return res.status(422).render('admin/categories/create', {
       pageTitle: 'Thêm danh mục',
+      category: presentCategory({ image: '' }),
       errors,
       oldInput,
     });
@@ -153,15 +178,18 @@ const createCategory = async (req, res, next) => {
     await categoryService.createCategory({
       name: req.body.name,
       description: req.body.description,
-      image: req.body.image,
+      image: newImagePath,
       status: req.body.status,
     });
 
     return res.redirect(303, '/admin/categories?created=1');
   } catch (error) {
+    await deleteStoredCategoryImage(newImagePath);
+
     if (isDuplicateError(error)) {
       return res.status(409).render('admin/categories/create', {
         pageTitle: 'Thêm danh mục',
+        category: presentCategory({ image: '' }),
         errors: { name: error.message },
         oldInput,
       });
@@ -170,7 +198,12 @@ const createCategory = async (req, res, next) => {
     if (isInvalidCategoryError(error)) {
       return res.status(422).render('admin/categories/create', {
         pageTitle: 'Thêm danh mục',
-        errors: { name: error.message },
+        category: presentCategory({ image: '' }),
+        errors: {
+          [error.code === categoryService.CATEGORY_INVALID_IMAGE
+            ? 'image'
+            : 'name']: error.message,
+        },
         oldInput,
       });
     }
@@ -189,7 +222,7 @@ const showEditCategoryForm = async (req, res, next) => {
 
     return res.render('admin/categories/edit', {
       pageTitle: 'Chỉnh sửa danh mục',
-      category,
+      category: presentCategory(category),
       errors: {},
       oldInput: getOldInput(category),
     });
@@ -199,39 +232,62 @@ const showEditCategoryForm = async (req, res, next) => {
 };
 
 const updateCategory = async (req, res, next) => {
+  const newImagePath = uploadedCategoryImageToPublicPath(req.file);
+  let categoryUpdated = false;
+
   try {
     const category = await categoryService.getCategoryById(req.params.id);
 
     if (!category) {
+      await deleteStoredCategoryImage(newImagePath);
       return renderNotFound(req, res);
     }
 
     const errors = getFieldErrors(req);
     const oldInput = getOldInput(req.body);
 
+    if (req.categoryImageUploadError) {
+      errors.image = req.categoryImageUploadError.message;
+    }
+
     if (Object.keys(errors).length > 0) {
+      await deleteStoredCategoryImage(newImagePath);
+
       return res.status(422).render('admin/categories/edit', {
         pageTitle: 'Chỉnh sửa danh mục',
-        category,
+        category: presentCategory(category),
         errors,
         oldInput,
       });
     }
 
+    const oldImage = isManagedCategoryImagePath(category.image)
+      ? category.image
+      : '';
+    const removeImage = ['1', 'on'].includes(req.body.removeImage);
+    const finalImage = newImagePath || (removeImage ? '' : oldImage);
+
     try {
       await categoryService.updateCategory(req.params.id, {
         name: req.body.name,
         description: req.body.description,
-        image: req.body.image,
+        image: finalImage,
         status: req.body.status,
       });
+      categoryUpdated = true;
+
+      if (oldImage !== finalImage) {
+        await deleteStoredCategoryImage(oldImage);
+      }
 
       return res.redirect(303, '/admin/categories?updated=1');
     } catch (error) {
+      await deleteStoredCategoryImage(newImagePath);
+
       if (isDuplicateError(error)) {
         return res.status(409).render('admin/categories/edit', {
           pageTitle: 'Chỉnh sửa danh mục',
-          category,
+          category: presentCategory(category),
           errors: { name: error.message },
           oldInput,
         });
@@ -240,8 +296,12 @@ const updateCategory = async (req, res, next) => {
       if (isInvalidCategoryError(error)) {
         return res.status(422).render('admin/categories/edit', {
           pageTitle: 'Chỉnh sửa danh mục',
-          category,
-          errors: { name: error.message },
+          category: presentCategory(category),
+          errors: {
+            [error.code === categoryService.CATEGORY_INVALID_IMAGE
+              ? 'image'
+              : 'name']: error.message,
+          },
           oldInput,
         });
       }
@@ -253,6 +313,10 @@ const updateCategory = async (req, res, next) => {
       throw error;
     }
   } catch (error) {
+    if (!categoryUpdated) {
+      await deleteStoredCategoryImage(newImagePath);
+    }
+
     return next(error);
   }
 };

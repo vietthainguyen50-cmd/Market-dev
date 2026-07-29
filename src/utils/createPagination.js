@@ -1,4 +1,8 @@
 const buildListingQuery = require('./buildListingQuery');
+const {
+  buildAdminListingsUrl,
+  buildAdminUsersUrl,
+} = require('./buildAdminQuery');
 
 const PAGE_WINDOW_SIZE = 5;
 
@@ -70,12 +74,26 @@ const createConversationMessagesPagination = (
     buildConversationMessagesUrl(conversationId, page),
   );
 
+const createAdminUsersPagination = (pagination, filters) =>
+  createPaginationLinks(pagination, (page) =>
+    buildAdminUsersUrl(filters, page),
+  );
+
+const createAdminListingsPagination = (pagination, filters) =>
+  createPaginationLinks(pagination, (page) =>
+    buildAdminListingsUrl(filters, page),
+  );
+
 module.exports = {
+  buildAdminListingsUrl,
+  buildAdminUsersUrl,
   buildConversationMessagesUrl,
   buildFavoritesUrl,
   buildListingUrl,
   buildMessagesUrl,
   createConversationMessagesPagination,
+  createAdminListingsPagination,
+  createAdminUsersPagination,
   createFavoritesPagination,
   createMessagesPagination,
   createPagination,

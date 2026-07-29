@@ -8,9 +8,14 @@
       height="600"
       loading="lazy"
     >
-    <% if (listing.status === 'sold' || listing.status === 'hidden') { %>
+    <% if (!listing.isHiddenByAdmin && (listing.status === 'sold' || listing.status === 'hidden')) { %>
       <span class="badge status-badge status-badge--<%= listing.status %> listing-status-overlay">
         <%= listing.statusLabel %>
+      </span>
+    <% } %>
+    <% if (listing.isHiddenByAdmin) { %>
+      <span class="badge status-badge status-badge--warning listing-status-overlay">
+        Ẩn bởi quản trị viên
       </span>
     <% } %>
     <% if (typeof showFavoriteAction !== 'undefined' && showFavoriteAction) { %>

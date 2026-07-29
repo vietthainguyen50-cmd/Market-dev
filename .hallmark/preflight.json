@@ -1,5 +1,6 @@
 {
   "date": "2026-07-29",
+  "refreshed_because": "package.json changed after the previous scan; design signals are unchanged",
   "framework": "Express 5 + EJS + Bootstrap 5",
   "font_stack": "Bahnschrift display, Aptos body, Cascadia Mono outlier",
   "palette": "OKLCH custom properties in src/public/css/tokens.css",

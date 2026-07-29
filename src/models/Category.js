@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+const {
+  isManagedCategoryImagePath,
+} = require('../utils/categoryImageStorage');
+
 const categorySchema = new mongoose.Schema(
   {
     name: {
@@ -27,6 +31,11 @@ const categorySchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+      validate: {
+        validator: (value) =>
+          value === '' || isManagedCategoryImagePath(value),
+        message: 'Ảnh danh mục không hợp lệ.',
+      },
     },
     status: {
       type: String,

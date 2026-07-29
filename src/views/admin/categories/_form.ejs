@@ -1,4 +1,9 @@
-<form class="admin-category-form" action="<%= formAction %>" method="POST">
+<form
+  class="admin-category-form"
+  action="<%= formAction %>"
+  method="POST"
+  enctype="multipart/form-data"
+>
   <div class="mb-3">
     <label class="form-label fw-semibold" for="name">Tên danh mục</label>
     <input
@@ -32,20 +37,50 @@
   </div>
 
   <div class="mb-3">
-    <label class="form-label fw-semibold" for="image">URL hoặc đường dẫn ảnh tĩnh</label>
+    <label class="form-label fw-semibold" for="image">Ảnh danh mục</label>
     <input
       class="form-control<%= errors.image ? ' is-invalid' : '' %>"
       id="image"
       name="image"
-      type="text"
-      value="<%= oldInput.image %>"
-      maxlength="2048"
-      placeholder="https://example.com/image.jpg hoặc /images/category.jpg"
+      type="file"
+      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
       aria-invalid="<%= errors.image ? 'true' : 'false' %>"
-      aria-describedby="categoryImageError"
+      aria-describedby="categoryImageError categoryImageHelp"
     >
     <div class="invalid-feedback field-feedback-slot" id="categoryImageError"><%= errors.image || '' %></div>
+    <div class="form-text" id="categoryImageHelp">
+      Không bắt buộc. Chọn JPG, JPEG, PNG hoặc WEBP tối đa 3 MB;
+      khuyến nghị tỷ lệ 16:9, khoảng 800 × 500 px.
+    </div>
   </div>
+
+  <% if (category && category.hasManagedImage) { %>
+    <div class="admin-category-image-preview mb-3">
+      <img
+        src="<%= category.imageUrl %>"
+        alt="Ảnh hiện tại của danh mục <%= category.name %>"
+        width="640"
+        height="360"
+      >
+    </div>
+    <div class="form-check mb-4">
+      <input
+        class="form-check-input"
+        id="removeImage"
+        name="removeImage"
+        type="checkbox"
+        value="1"
+      >
+      <label class="form-check-label" for="removeImage">
+        Xóa ảnh hiện tại
+      </label>
+      <div class="form-text">Nếu chọn ảnh mới, ảnh mới sẽ được ưu tiên.</div>
+    </div>
+  <% } else if (category) { %>
+    <div class="admin-category-image-fallback mb-3" aria-hidden="true">
+      <%- include('../../categories/_icon', { category }) %>
+    </div>
+  <% } %>
 
   <div class="mb-4">
     <label class="form-label fw-semibold" for="status">Trạng thái</label>

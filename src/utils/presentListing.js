@@ -32,6 +32,7 @@ const presentListing = (listing, options = {}) => {
     ),
     conditionLabel: conditionLabels[data.condition] || data.condition,
     statusLabel: statusLabels[data.status] || data.status,
+    isHiddenByAdmin: data.moderation?.isHiddenByAdmin === true,
     isFavorited: Boolean(options.isFavorited),
   };
 };

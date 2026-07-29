@@ -2,23 +2,6 @@ const { body } = require('express-validator');
 
 const createSlug = require('../utils/createSlug');
 
-const isValidImage = (value) => {
-  if (!value) {
-    return true;
-  }
-
-  if (value.startsWith('/') && !value.startsWith('//')) {
-    return true;
-  }
-
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch (error) {
-    return false;
-  }
-};
-
 const categoryValidator = [
   body('name')
     .trim()
@@ -40,17 +23,13 @@ const categoryValidator = [
     .trim()
     .isLength({ max: 500 })
     .withMessage('Mô tả không được vượt quá 500 ký tự.'),
-  body('image')
+  body('removeImage')
     .optional({ values: 'falsy' })
     .isString()
-    .withMessage('Đường dẫn ảnh phải là chuỗi ký tự.')
+    .withMessage('Yêu cầu xóa ảnh danh mục không hợp lệ.')
     .bail()
-    .trim()
-    .isLength({ max: 2048 })
-    .withMessage('Đường dẫn ảnh không được vượt quá 2048 ký tự.')
-    .bail()
-    .custom(isValidImage)
-    .withMessage('Ảnh phải là URL http/https hoặc đường dẫn tĩnh bắt đầu bằng /.'),
+    .isIn(['1', 'on'])
+    .withMessage('Yêu cầu xóa ảnh danh mục không hợp lệ.'),
   body('status')
     .notEmpty()
     .withMessage('Trạng thái danh mục là bắt buộc.')

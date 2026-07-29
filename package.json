@@ -9,6 +9,8 @@
     "test": "node --test",
     "test:e2e:favorite": "node scripts/verifyStep10E2e.js",
     "test:e2e:messages": "node scripts/verifyStep11E2e.js",
+    "test:e2e:admin": "node scripts/verifyStep12E2e.js",
+    "test:e2e:category-image": "node scripts/verifyCategoryImageE2e.js",
     "test:e2e:profile": "node scripts/verifyStep9E2e.js",
     "seed:categories": "node scripts/seedCategories.js"
   },

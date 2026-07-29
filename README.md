@@ -349,6 +349,59 @@ npm run test:e2e:messages
 
 Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợp, gồm privacy participant, active/sold/hidden, duplicate/concurrent Conversation, transaction rollback, XSS, pagination, unread/mark-read và các hồi quy Bước 1–10. Fixture có nhãn ngẫu nhiên được xóa theo đúng ID sau khi chạy; script không in email, mật khẩu, cookie, MongoDB URI hoặc session secret.
 
+## Quản trị User và kiểm duyệt Listing
+
+Bước 12 bổ sung dashboard quản trị tại `GET /admin`, quản lý tài khoản và kiểm duyệt bài đăng. Toàn bộ route trong khu vực này đều đi qua `requireAuth` và `requireAdmin`; tài khoản admin cũng phải ở trạng thái `active`.
+
+Route quản trị User:
+
+- `GET /admin/users`: tìm theo tên/email, lọc trạng thái và phân trang 20 User mỗi trang.
+- `GET /admin/users/:id`: xem metadata tài khoản, thống kê và tối đa 5 Listing gần nhất; không truy vấn hoặc render password.
+- `PATCH /admin/users/:id/approve`: chỉ chuyển `pending` sang `active`.
+- `PATCH /admin/users/:id/block`: chỉ chuyển User thường đang `active` sang `blocked`, bắt buộc lý do 10–500 ký tự.
+- `PATCH /admin/users/:id/unblock`: chỉ chuyển `blocked` về `active`.
+
+`User.accountModeration` lưu metadata phê duyệt/chặn gồm thời điểm và admin thực hiện. Khi bỏ chặn, hệ thống xóa metadata của lần chặn hiện tại (`blockedReason`, `blockedAt`, `blockedBy`) nhưng giữ metadata phê duyệt. Admin không thể tự chặn, chặn admin khác hoặc thay đổi role qua các action này. Session của User không còn `active` bị hủy an toàn ở request tiếp theo và User trở về trạng thái guest.
+
+Route quản trị Listing:
+
+- `GET /admin/listings`: tìm theo tiêu đề/người bán, lọc category, trạng thái Listing và trạng thái kiểm duyệt; phân trang 20 mục mỗi trang.
+- `GET /admin/listings/:id`: xem thông tin Listing, ảnh theo `object-fit: contain`, số Favorite và metadata Conversation/Message mà không đọc nội dung Message.
+- `PATCH /admin/listings/:id/hide`: ẩn bài bằng moderation metadata, lưu `previousStatus` và không xóa document hoặc file ảnh.
+- `PATCH /admin/listings/:id/restore`: khôi phục trạng thái `active` hoặc `sold` trước đó; dữ liệu cũ không hợp lệ dùng fallback `active`.
+
+`Listing.moderation.isHiddenByAdmin` phân biệt bài bị admin ẩn với soft hide do owner. Khi bị admin ẩn, owner vẫn nhận được thông báo nhưng không thể sửa, đổi trạng thái hoặc xóa mềm bài; kiểm tra được thực hiện cả ở middleware và service để tránh race condition. Việc ẩn/khôi phục dùng cập nhật có điều kiện, không có route hard delete.
+
+Dashboard chỉ hiển thị số liệu tổng hợp và bản ghi gần đây. Thống kê Message dùng `countDocuments`; ứng dụng không tải hay hiển thị nội dung Message trong khu vực Admin. Giao diện dùng macrostructure Stat-Led của Hallmark, token trong `tokens.css`, focus-visible, reduced-motion và layout mobile-first.
+
+Chạy unit test và E2E Admin:
+
+```bash
+npm test
+npm run test:e2e:admin
+```
+
+Verifier E2E kiểm tra 74 nhóm trường hợp trên MongoDB Atlas thật, gồm phân quyền, chuyển trạng thái, privacy, race condition, responsive ở 320/375/414/768/1024 px và hồi quy Bước 1–11. Fixture được gắn nhãn ngẫu nhiên, xóa theo đúng ID sau mỗi lần chạy và audit orphan document/file; script không in email, mật khẩu, cookie, MongoDB URI, session secret hoặc nội dung Message.
+
+## Upload và quản lý ảnh danh mục
+
+Bước 12.1 mở rộng khu vực Admin Category để admin có thể tạo danh mục không ảnh, upload ảnh mới, thay ảnh hoặc xóa ảnh hiện tại. Form dùng `multipart/form-data` với một field file duy nhất tên `image`; chỉ nhận JPG/JPEG, PNG hoặc WEBP tối đa 3 MB và không nhận SVG. Tên file do server tạo bằng UUID và extension được ánh xạ từ MIME type, không sử dụng filename gốc từ client.
+
+Ảnh được lưu local tại `uploads/categories/`. MongoDB chỉ lưu public path được ứng dụng quản lý theo dạng `/uploads/categories/<uuid>.<extension>`; không lưu Buffer, Base64, absolute path, URL ngoài hoặc metadata Multer. Category có thể không có ảnh và khi đó trang danh sách, trang chi tiết cùng khu vực Admin sử dụng icon theo slug làm fallback. Trang chủ tiếp tục giữ card Category icon compact hiện tại.
+
+Khi tạo hoặc cập nhật thất bại vì validation, trùng dữ liệu hay lỗi database, ảnh mới vừa upload được cleanup. Khi thay hoặc xóa ảnh, database luôn được cập nhật trước rồi file cũ mới được xóa; nếu vừa upload ảnh mới vừa chọn xóa ảnh hiện tại thì ảnh mới được ưu tiên. Thay đổi `active`/`inactive` chỉ sửa trạng thái và không tác động đến ảnh. Utility chỉ cho phép xóa file UUID thuộc đúng `uploads/categories/`, không thể xóa ảnh Listing, avatar, icon hoặc file ngoài thư mục này.
+
+Trang `/categories` dùng card link duy nhất với ảnh 16:9 hoặc icon fallback; trang `/categories/:slug` có media gọn và giữ nguyên Listing, Favorite, filter cùng empty state. Admin list hiển thị thumbnail 80 × 50 px, còn form edit hiển thị preview và chỉ có checkbox xóa khi Category đang sở hữu managed image.
+
+Lưu trữ local phù hợp cho môi trường development hiện tại; Bước 12.1 không dùng Cloudinary hoặc S3 và không cài thêm package. Chạy unit test và verifier E2E:
+
+```bash
+npm test
+npm run test:e2e:category-image
+```
+
+Verifier tạo riêng admin, user, Category có/không có ảnh cùng các fixture regression cần thiết, kiểm tra phân quyền, MIME/dung lượng, cleanup, public/static UI, responsive và hồi quy Listing/avatar/Favorite/Message/Admin. Sau khi chạy, script xóa đúng ID và file fixture của chính lần chạy, không dùng `deleteMany({})`, không xóa dữ liệu thật và không in email, mật khẩu, cookie, MongoDB URI hoặc session secret.
+
 ## Cấu trúc cơ bản
 
 ```text
@@ -368,6 +421,7 @@ Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợ
 │   │   ├── admin.middleware.js
 │   │   ├── avatar.middleware.js
 │   │   ├── auth.middleware.js
+│   │   ├── categoryImage.middleware.js
 │   │   ├── error.middleware.js
 │   │   ├── listing.middleware.js
 │   │   ├── upload.middleware.js
@@ -396,6 +450,7 @@ Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợ
 │   │   ├── buildListingQuery.js
 │   │   ├── createPagination.js
 │   │   ├── createSlug.js
+│   │   ├── categoryImageStorage.js
 │   │   ├── escapeRegex.js
 │   │   ├── fileStorage.js
 │   │   ├── formatPrice.js
@@ -431,9 +486,11 @@ Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợ
 │   └── app.js
 ├── uploads/
 │   ├── avatars/
+│   ├── categories/
 │   └── listings/
 ├── scripts/
 │   ├── seedCategories.js
+│   ├── verifyCategoryImageE2e.js
 │   └── verifyStep10E2e.js
 ├── .env.example
 ├── package.json
@@ -443,4 +500,4 @@ Verifier E2E dùng MongoDB Atlas thật để kiểm tra 48 nhóm trường hợ
 
 ## Trạng thái dự án
 
-Bước 11 đã hoàn thành nhắn tin văn bản riêng tư giữa buyer và seller theo Listing, gồm Conversation duy nhất, Message transaction-safe, participant authorization, unread/mark-read, phân trang và giao diện Workbench responsive. Dự án tiếp tục giữ nguyên Favorite, auth, session, Category, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, Atlas Search, Elasticsearch, JWT, admin dashboard hoàn chỉnh, Socket.IO/WebSocket, notification, gửi ảnh/file trong chat hoặc thanh toán.
+Bước 12.1 đã bổ sung upload, thay và xóa ảnh Category có cleanup an toàn, public Catalogue dùng ảnh 16:9 hoặc icon fallback, còn Home giữ icon compact. Dashboard Admin, quản lý vòng đời tài khoản `pending`/`active`/`blocked`, kiểm duyệt Listing, Message riêng tư, Favorite, auth, session, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile tiếp tục được giữ nguyên. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, S3, Atlas Search, Elasticsearch, JWT, Socket.IO/WebSocket, notification, gửi ảnh/file trong chat hoặc thanh toán.

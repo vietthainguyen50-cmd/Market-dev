@@ -14,11 +14,14 @@ const CATEGORY_INACTIVE_MESSAGE =
   'Danh mục này hiện không hoạt động. Vui lòng chọn danh mục khác.';
 const INVALID_LISTING_STATUS = 'INVALID_LISTING_STATUS';
 const INVALID_LISTING_STATUS_MESSAGE = 'Trạng thái bài đăng không hợp lệ.';
+const LISTING_ADMIN_HIDDEN = 'LISTING_ADMIN_HIDDEN';
+const LISTING_ADMIN_HIDDEN_MESSAGE =
+  'Bài đăng đang bị quản trị viên ẩn và không thể chỉnh sửa.';
 const ALLOWED_STATUSES = ['active', 'sold', 'hidden'];
 const PUBLIC_STATUSES = ['active', 'sold'];
 const LISTINGS_PER_PAGE = 12;
 const PUBLIC_LISTING_SELECT =
-  'title description price category seller location condition images status createdAt updatedAt';
+  'title description price category seller location condition images status moderation createdAt updatedAt';
 const PUBLIC_SORT_OPTIONS = {
   newest: { createdAt: -1, _id: -1 },
   oldest: { createdAt: 1, _id: 1 },
@@ -119,7 +122,7 @@ const getLatestListings = (limit = 8) =>
   populatePublicListing(
     Listing.find({ status: 'active' })
       .select(
-        'title price category seller location condition images status createdAt',
+      'title price category seller location condition images status createdAt',
       )
       .sort({ createdAt: -1 })
       .limit(limit),
@@ -132,7 +135,7 @@ const getListingById = (listingId) => {
 
   return Listing.findById(listingId)
     .select(
-      'title description price category seller location condition images status createdAt updatedAt',
+      'title description price category seller location condition images status moderation createdAt updatedAt',
     )
     .populate('category', 'name slug status')
     .populate('seller', 'name avatar phone')
@@ -144,7 +147,9 @@ const getListingDocumentById = (listingId) => {
     return null;
   }
 
-  return Listing.findById(listingId).select('_id seller images status');
+  return Listing.findById(listingId).select(
+    '_id seller images status moderation',
+  );
 };
 
 const getListingsByCategory = (category) => {
@@ -160,7 +165,7 @@ const getListingsByCategory = (category) => {
       status: { $in: PUBLIC_STATUSES },
     })
       .select(
-        'title description price category seller location condition images status createdAt updatedAt',
+        'title description price category seller location condition images status moderation createdAt updatedAt',
       )
       .sort({ createdAt: -1 }),
   ).lean();
@@ -174,7 +179,7 @@ const getListingsBySeller = (sellerId) => {
   return populatePublicListing(
     Listing.find({ seller: sellerId })
       .select(
-        'title description price category seller location condition images status createdAt updatedAt',
+        'title description price category seller location condition images status moderation createdAt updatedAt',
       )
       .sort({ createdAt: -1 }),
   ).lean();
@@ -246,6 +251,13 @@ const updateListing = async (listingId, data) => {
     throw createListingError(LISTING_NOT_FOUND, LISTING_NOT_FOUND_MESSAGE);
   }
 
+  if (listing.moderation?.isHiddenByAdmin === true) {
+    throw createListingError(
+      LISTING_ADMIN_HIDDEN,
+      LISTING_ADMIN_HIDDEN_MESSAGE,
+    );
+  }
+
   const normalizedData = normalizeListingData(data);
   const category = await getActiveCategory(normalizedData.category);
 
@@ -281,6 +293,13 @@ const updateListingStatus = async (listingId, status) => {
     throw createListingError(LISTING_NOT_FOUND, LISTING_NOT_FOUND_MESSAGE);
   }
 
+  if (listing.moderation?.isHiddenByAdmin === true) {
+    throw createListingError(
+      LISTING_ADMIN_HIDDEN,
+      LISTING_ADMIN_HIDDEN_MESSAGE,
+    );
+  }
+
   listing.status = status;
   return listing.save();
 };
@@ -294,6 +313,8 @@ module.exports = {
   CATEGORY_NOT_FOUND_MESSAGE,
   INVALID_LISTING_STATUS,
   INVALID_LISTING_STATUS_MESSAGE,
+  LISTING_ADMIN_HIDDEN,
+  LISTING_ADMIN_HIDDEN_MESSAGE,
   LISTING_NOT_FOUND,
   LISTING_NOT_FOUND_MESSAGE,
   LISTINGS_PER_PAGE,

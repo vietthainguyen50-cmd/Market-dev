@@ -130,10 +130,12 @@ const getImageFormData = ({
 
 const renderListingDetail = (req, res, listing, options = {}) => {
   const isOwner = isListingOwner(listing, req.user);
-  const canManage = canManageListing(listing, req.user);
   const presentedListing = presentListing(listing, {
     isFavorited: options.isFavorited,
   });
+  const canManage =
+    canManageListing(listing, req.user) &&
+    !presentedListing.isHiddenByAdmin;
   presentedListing.sellerAvatar =
     getSafeAvatar(listing.seller?.avatar) || DEFAULT_AVATAR;
 

@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 
 const Category = require('../models/Category');
 const createSlug = require('../utils/createSlug');
+const {
+  isManagedCategoryImagePath,
+} = require('../utils/categoryImageStorage');
 
 const CATEGORY_NOT_FOUND = 'CATEGORY_NOT_FOUND';
 const CATEGORY_NOT_FOUND_MESSAGE = 'Không tìm thấy danh mục.';
@@ -15,6 +18,8 @@ const CATEGORY_INVALID_SLUG_MESSAGE =
   'Tên danh mục phải tạo được đường dẫn hợp lệ.';
 const CATEGORY_INVALID_STATUS = 'CATEGORY_INVALID_STATUS';
 const CATEGORY_INVALID_STATUS_MESSAGE = 'Trạng thái danh mục không hợp lệ.';
+const CATEGORY_INVALID_IMAGE = 'CATEGORY_INVALID_IMAGE';
+const CATEGORY_INVALID_IMAGE_MESSAGE = 'Ảnh danh mục không hợp lệ.';
 const ALLOWED_STATUSES = ['active', 'inactive'];
 
 const createCategoryError = (code, message) => {
@@ -58,7 +63,8 @@ const normalizeCategoryData = (data) => {
   const description =
     typeof data.description === 'string' ? data.description.trim() : '';
   const image = typeof data.image === 'string' ? data.image.trim() : '';
-  const status = data.status || 'active';
+  const status =
+    typeof data.status === 'string' ? data.status.trim() : 'active';
   const slug = createSlug(name);
 
   if (!slug) {
@@ -72,6 +78,13 @@ const normalizeCategoryData = (data) => {
     throw createCategoryError(
       CATEGORY_INVALID_STATUS,
       CATEGORY_INVALID_STATUS_MESSAGE,
+    );
+  }
+
+  if (image !== '' && !isManagedCategoryImagePath(image)) {
+    throw createCategoryError(
+      CATEGORY_INVALID_IMAGE,
+      CATEGORY_INVALID_IMAGE_MESSAGE,
     );
   }
 
@@ -186,19 +199,27 @@ const updateCategoryStatus = async (categoryId, status) => {
     throw createCategoryError(CATEGORY_NOT_FOUND, CATEGORY_NOT_FOUND_MESSAGE);
   }
 
-  const category = await Category.findById(categoryId);
+  const category = await Category.findByIdAndUpdate(
+    categoryId,
+    { $set: { status } },
+    {
+      returnDocument: 'after',
+      runValidators: true,
+    },
+  );
 
   if (!category) {
     throw createCategoryError(CATEGORY_NOT_FOUND, CATEGORY_NOT_FOUND_MESSAGE);
   }
 
-  category.status = status;
-  return category.save();
+  return category;
 };
 
 module.exports = {
   CATEGORY_ALREADY_EXISTS,
   CATEGORY_ALREADY_EXISTS_MESSAGE,
+  CATEGORY_INVALID_IMAGE,
+  CATEGORY_INVALID_IMAGE_MESSAGE,
   CATEGORY_INVALID_SLUG,
   CATEGORY_INVALID_SLUG_MESSAGE,
   CATEGORY_INVALID_STATUS,

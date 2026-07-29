@@ -54,6 +54,32 @@ const userSchema = new mongoose.Schema(
       enum: ['active', 'blocked', 'pending'],
       default: 'active',
     },
+    accountModeration: {
+      blockedReason: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+        default: '',
+      },
+      blockedAt: {
+        type: Date,
+        default: null,
+      },
+      blockedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+      approvedAt: {
+        type: Date,
+        default: null,
+      },
+      approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

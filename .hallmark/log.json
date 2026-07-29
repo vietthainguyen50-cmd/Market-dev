@@ -2,6 +2,22 @@
   {
     "date": "2026-07-29",
     "scope": "app-page",
+    "macrostructure": "Catalogue / Workbench category ledger",
+    "theme": "NTT Cobalt (design.md locked)",
+    "enrichment": "admin-supplied Category imagery with icon fallback",
+    "brief": "Step 12.1 · Category image upload and public catalogue"
+  },
+  {
+    "date": "2026-07-29",
+    "scope": "page",
+    "macrostructure": "Ecosystem Index / H2 Split diptych",
+    "theme": "NTT Cobalt (design.md locked)",
+    "enrichment": "E8 user-supplied Listing photography",
+    "brief": "Home · compact discovery-first marketplace landing"
+  },
+  {
+    "date": "2026-07-29",
+    "scope": "app-page",
     "macrostructure": "Workbench / Conversation ledger",
     "theme": "NTT Cobalt (design.md locked)",
     "enrichment": "Listing and participant avatar context only",
@@ -22,5 +38,13 @@
     "theme": "NTT Cobalt",
     "enrichment": "user-supplied product imagery",
     "brief": "NTT Marketplace · multi-page UI foundation"
+  },
+  {
+    "date": "2026-07-29",
+    "scope": "app-page",
+    "macrostructure": "Stat-Led / Catalogue / Specification ledger",
+    "theme": "NTT Cobalt (design.md locked)",
+    "enrichment": "user-supplied listing imagery only",
+    "brief": "Step 12 · Admin user operations and listing moderation"
   }
 ]

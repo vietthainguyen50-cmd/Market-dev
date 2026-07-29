@@ -29,6 +29,12 @@ const requireListingOwnerOrAdmin = (req, res, next) => {
   const isOwner = req.listing.seller.equals(req.user._id);
   const isAdmin = req.user.role === 'admin';
 
+  if (req.listing.moderation?.isHiddenByAdmin === true) {
+    return res.status(403).render('errors/403', {
+      pageTitle: 'Bài đăng đang bị kiểm duyệt',
+    });
+  }
+
   if (!isOwner && !isAdmin) {
     return res.status(403).render('errors/403', {
       pageTitle: 'Không có quyền truy cập',

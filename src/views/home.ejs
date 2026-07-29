@@ -1,5 +1,7 @@
 <%- include('partials/header') %>
 
+<% const featuredListing = listings.length > 0 ? listings[0] : null; %>
+
 <section class="hero-section market-hero">
   <div class="container">
     <div class="market-hero-layout">
@@ -32,86 +34,77 @@
         </div>
       </div>
 
-      <aside class="market-hero-index" aria-label="Khám phá nhanh">
-        <p class="market-hero-index-title">Khám phá nhanh</p>
-        <a class="market-hero-index-link" href="#categories">
-          <span>Danh mục đang hiển thị</span>
-          <span class="market-hero-index-value"><%= categories.length %></span>
-        </a>
-        <a class="market-hero-index-link" href="#products">
-          <span>Tin mới đang hiển thị</span>
-          <span class="market-hero-index-value"><%= listings.length %></span>
-        </a>
-        <a class="market-hero-index-link" href="/listings">
-          <span>Mở danh sách sản phẩm</span>
-          <span aria-hidden="true">→</span>
-        </a>
-      </aside>
-    </div>
-  </div>
-</section>
-
-<section class="section-space bg-white" id="categories">
-  <div class="container">
-    <div class="page-section-head">
-      <div>
-        <h2 class="mb-2">Khám phá theo danh mục</h2>
-        <p class="text-secondary mb-0">Đi thẳng đến nhóm sản phẩm bạn quan tâm.</p>
-      </div>
-      <a class="btn btn-outline-secondary" href="/categories">Tất cả danh mục</a>
-    </div>
-    <% if (categories.length > 0) { %>
-      <div class="row g-4 mt-3">
-        <% categories.forEach((category) => { %>
-          <div class="col-12 col-sm-6 col-lg-3">
-            <a class="category-card-link" href="/categories/<%= category.slug %>">
-              <article class="category-card h-100">
-                <div class="category-media mb-3">
-                  <% if (category.image) { %>
-                    <img
-                      class="category-image"
-                      src="<%= category.image %>"
-                      alt="Ảnh danh mục <%= category.name %>"
-                      width="800"
-                      height="450"
-                    >
-                  <% } else { %>
-                    <div class="category-card__icon" aria-hidden="true">
-                      <%- include('categories/_icon', { category }) %>
-                    </div>
-                  <% } %>
-                </div>
-                <h3 class="h5 fw-bold mb-1"><%= category.name %></h3>
-                <p class="small text-secondary mb-0">
-                  <%= category.description || 'Khám phá sản phẩm trong danh mục này.' %>
-                </p>
-              </article>
-            </a>
+      <% if (featuredListing) { %>
+        <article class="market-hero-featured">
+          <a
+            class="market-hero-featured__media"
+            href="/listings/<%= featuredListing._id %>"
+            aria-label="Xem <%= featuredListing.title %>"
+          >
+            <img
+              src="<%= featuredListing.primaryImage %>"
+              alt="Ảnh sản phẩm <%= featuredListing.title %>"
+              width="800"
+              height="600"
+              fetchpriority="high"
+            >
+          </a>
+          <div class="market-hero-featured__body">
+            <div class="market-hero-featured__meta">
+              <span class="condition-badge"><%= featuredListing.conditionLabel %></span>
+              <span>Tin mới</span>
+            </div>
+            <h2>
+              <a href="/listings/<%= featuredListing._id %>"><%= featuredListing.title %></a>
+            </h2>
+            <p class="market-hero-featured__price"><%= featuredListing.formattedPrice %></p>
+            <p class="market-hero-featured__location">
+              <%= featuredListing.location %>
+              <% if (featuredListing.category) { %>
+                · <%= featuredListing.category.name %>
+              <% } %>
+            </p>
           </div>
-        <% }); %>
-      </div>
-    <% } else { %>
-      <div class="empty-state mt-4" role="status">
-        <h3 class="h5">Chưa có danh mục hoạt động.</h3>
-        <p class="text-secondary mb-0">Danh mục sẽ xuất hiện tại đây khi được quản trị viên kích hoạt.</p>
-      </div>
-    <% } %>
+        </article>
+      <% } else { %>
+        <aside class="market-hero-featured market-hero-featured--empty" aria-label="Trạng thái sản phẩm mới">
+          <svg
+            class="market-hero-empty-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 7h16v13H4z"></path>
+            <path d="M8 7a4 4 0 0 1 8 0"></path>
+            <path d="M9 12h6"></path>
+          </svg>
+          <div>
+            <h2>Tin mới sẽ xuất hiện tại đây.</h2>
+            <p>Đăng sản phẩm đầu tiên để cộng đồng có thể tìm thấy món đồ của bạn.</p>
+          </div>
+        </aside>
+      <% } %>
+    </div>
   </div>
 </section>
 
-<section class="section-space products-section" id="products">
+<section class="home-section home-products-section" id="products">
   <div class="container">
-    <div class="page-section-head">
+    <div class="home-section-heading">
       <div>
-        <h2 class="mb-2">Tin mới đăng</h2>
-        <p class="text-secondary mb-0">Các sản phẩm đang được cộng đồng rao bán gần đây.</p>
+        <h2>Sản phẩm mới đăng</h2>
+        <p>Những món đồ vừa được cộng đồng đưa lên Marketplace.</p>
       </div>
-      <a class="btn btn-outline-secondary" href="/listings">Xem tất cả tin</a>
+      <a class="home-section-link" href="/listings">Xem tất cả →</a>
     </div>
     <% if (listings.length > 0) { %>
-      <div class="row g-4 mt-3">
+      <div class="row g-3 g-xl-4 home-products-grid">
         <% listings.forEach((listing) => { %>
-          <div class="col-12 col-sm-6 col-xl-3">
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
             <%- include('listings/_card', {
               listing,
               showFavoriteAction: true,
@@ -121,7 +114,7 @@
         <% }); %>
       </div>
     <% } else { %>
-      <div class="empty-state mt-4" role="status">
+      <div class="empty-state" role="status">
         <h3 class="h5">Chưa có sản phẩm đang bán.</h3>
         <p class="text-secondary">Đăng tin đầu tiên để bắt đầu kết nối với người mua.</p>
         <a class="btn btn-primary" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">Đăng tin</a>
@@ -130,15 +123,96 @@
   </div>
 </section>
 
-<section class="container pb-5" id="post-ad">
-  <div class="post-ad-banner p-4 p-lg-5 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
-    <div>
-      <h2 class="h3 mb-2">Bạn có món đồ không còn dùng?</h2>
-      <p class="mb-0">Tạo bài đăng rõ ràng để kết nối với người đang cần nó.</p>
+<section class="home-section home-categories-section" id="categories">
+  <div class="container">
+    <div class="home-section-heading">
+      <div>
+        <h2>Khám phá theo danh mục</h2>
+        <p>Đi thẳng đến nhóm sản phẩm bạn đang quan tâm.</p>
+      </div>
+      <a class="home-section-link" href="/categories">Tất cả danh mục →</a>
     </div>
-    <a class="btn btn-light" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
-      Tạo bài đăng
-    </a>
+    <% if (categories.length > 0) { %>
+      <div class="home-category-grid">
+        <% categories.forEach((category) => { %>
+          <a class="home-category-link" href="/categories/<%= category.slug %>">
+            <article class="home-category-card">
+              <span class="home-category-icon" aria-hidden="true">
+                <%- include('categories/_icon', { category }) %>
+              </span>
+              <h3><%= category.name %></h3>
+            </article>
+          </a>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="empty-state" role="status">
+        <h3 class="h5">Chưa có danh mục hoạt động.</h3>
+        <p class="text-secondary mb-0">Danh mục sẽ xuất hiện tại đây khi được quản trị viên kích hoạt.</p>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<section class="home-section home-benefits-section" aria-labelledby="homeBenefitsTitle">
+  <div class="container">
+    <div class="home-benefits-heading">
+      <h2 id="homeBenefitsTitle">Mua bán theo cách đơn giản.</h2>
+      <p>Mỗi công cụ chính đều nằm ngay trong luồng sử dụng hiện tại.</p>
+    </div>
+    <div class="home-benefit-list">
+      <article class="home-benefit">
+        <span class="home-benefit-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+          </svg>
+        </span>
+        <div>
+          <h3>Đăng tin nhanh chóng</h3>
+          <p>Thêm thông tin và ảnh để đưa món đồ của bạn lên Marketplace.</p>
+        </div>
+      </article>
+      <article class="home-benefit">
+        <span class="home-benefit-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+            <path d="M8 9h8M8 13h5"></path>
+          </svg>
+        </span>
+        <div>
+          <h3>Trao đổi trực tiếp</h3>
+          <p>Nhắn tin với người mua hoặc người bán theo đúng từng bài đăng.</p>
+        </div>
+      </article>
+      <article class="home-benefit">
+        <span class="home-benefit-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+            <path d="M8 11h6"></path>
+          </svg>
+        </span>
+        <div>
+          <h3>Tìm kiếm dễ dàng</h3>
+          <p>Tìm theo từ khóa và danh mục để thu hẹp sản phẩm phù hợp.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="home-cta-section" id="post-ad">
+  <div class="container">
+    <div class="home-cta-panel">
+      <div>
+        <h2>Bạn có món đồ không còn sử dụng?</h2>
+        <p>Tạo một bài đăng rõ ràng để kết nối với người đang cần món đồ đó.</p>
+      </div>
+      <a class="btn btn-light" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
+        Đăng tin ngay
+      </a>
+    </div>
   </div>
 </section>
 

@@ -1,4 +1,9 @@
 <div class="listing-actions">
+  <% if (listing.isHiddenByAdmin) { %>
+    <p class="alert alert-warning mb-0" role="status">
+      Bài đăng đang bị quản trị viên ẩn và không thể chỉnh sửa.
+    </p>
+  <% } else { %>
   <a class="btn btn-outline-primary" href="/listings/<%= listing._id %>/edit">
     Chỉnh sửa
   </a>
@@ -19,5 +24,6 @@
     <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
       <button class="btn btn-outline-danger" type="submit">Ẩn bài đăng</button>
     </form>
+  <% } %>
   <% } %>
 </div>

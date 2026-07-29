@@ -3,6 +3,19 @@ const { isManagedAvatarPath } = require('../utils/avatarStorage');
 
 const DEFAULT_AVATAR = '/images/default-avatar.svg';
 
+const destroySessionSafely = (req) =>
+  new Promise((resolve) => {
+    if (typeof req.session?.destroy !== 'function') {
+      if (req.session) {
+        delete req.session.userId;
+      }
+      resolve();
+      return;
+    }
+
+    req.session.destroy(() => resolve());
+  });
+
 const loadCurrentUser = async (req, res, next) => {
   req.user = null;
   res.locals.currentUser = null;
@@ -29,7 +42,7 @@ const loadCurrentUser = async (req, res, next) => {
       return next();
     }
 
-    delete req.session.userId;
+    await destroySessionSafely(req);
     return next();
   } catch (error) {
     return next(error);
@@ -53,6 +66,7 @@ const requireGuest = (req, res, next) => {
 };
 
 module.exports = {
+  destroySessionSafely,
   loadCurrentUser,
   requireAuth,
   requireGuest,

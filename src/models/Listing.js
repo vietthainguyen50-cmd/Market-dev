@@ -65,6 +65,32 @@ const listingSchema = new mongoose.Schema(
       default: 'active',
       index: true,
     },
+    moderation: {
+      isHiddenByAdmin: {
+        type: Boolean,
+        default: false,
+      },
+      reason: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+        default: '',
+      },
+      moderatedAt: {
+        type: Date,
+        default: null,
+      },
+      moderatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+      previousStatus: {
+        type: String,
+        enum: ['active', 'sold', null],
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,
@@ -76,6 +102,11 @@ listingSchema.index({ category: 1, status: 1, createdAt: -1 });
 listingSchema.index({ seller: 1, createdAt: -1 });
 listingSchema.index({ status: 1, createdAt: -1 });
 listingSchema.index({ status: 1, condition: 1, price: 1 });
+listingSchema.index({
+  status: 1,
+  'moderation.isHiddenByAdmin': 1,
+  createdAt: -1,
+});
 
 module.exports =
   mongoose.models.Listing || mongoose.model('Listing', listingSchema);

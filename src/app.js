@@ -5,6 +5,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 
 const { createSessionMiddleware } = require('./config/session');
+const adminRoutes = require('./routes/admin.routes');
 const adminCategoryRoutes = require('./routes/adminCategory.routes');
 const authRoutes = require('./routes/auth.routes');
 const categoryRoutes = require('./routes/category.routes');
@@ -76,6 +77,7 @@ app.use('/', messageRoutes);
 app.use('/', listingRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/admin/categories', adminCategoryRoutes);
+app.use('/admin', adminRoutes);
 app.use('/', homeRoutes);
 
 app.use(notFoundMiddleware);

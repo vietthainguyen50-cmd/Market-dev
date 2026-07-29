@@ -9,13 +9,14 @@
     <div class="row g-4 align-items-center">
       <div class="col-lg-5">
         <div class="category-detail-media">
-          <% if (category.image) { %>
+          <% if (category.hasManagedImage) { %>
             <img
               class="category-image"
-              src="<%= category.image %>"
+              src="<%= category.imageUrl %>"
               alt="Ảnh danh mục <%= category.name %>"
               width="800"
-              height="600"
+              height="450"
+              decoding="async"
             >
           <% } else { %>
             <div class="category-card__icon category-card__icon--large" aria-hidden="true">

@@ -1,7 +1,8 @@
-<%- include('../../partials/header') %>
+<%- include('../../partials/header', { pageStyles: ['/css/admin.css'] }) %>
 
 <section class="form-page">
-  <div class="container">
+  <div class="container admin-shell">
+    <%- include('../_navigation', { currentSection: 'categories' }) %>
     <div class="row justify-content-center">
       <div class="col-12 col-lg-8 col-xl-7">
         <div class="form-panel">
@@ -13,6 +14,7 @@
           <%- include('_form', {
             formAction: '/admin/categories',
             submitLabel: 'Tạo danh mục',
+            category,
             errors,
             oldInput
           }) %>
