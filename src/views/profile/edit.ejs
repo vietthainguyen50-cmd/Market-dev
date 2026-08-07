@@ -24,6 +24,7 @@
           <% } %>
 
           <form method="POST" action="/profile?_method=PUT" enctype="multipart/form-data">
+            <%- include('../partials/csrf') %>
             <div class="row g-4">
               <div class="col-12 col-lg-4">
                 <div class="profile-avatar-panel p-4 text-center h-100">

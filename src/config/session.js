@@ -6,6 +6,7 @@ const MongoStore =
 
 const DEFAULT_COOKIE_NAME = 'ntt_marketplace_sid';
 const DEFAULT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+let activeStore = null;
 
 const getSessionCookieName = () =>
   process.env.SESSION_COOKIE_NAME || DEFAULT_COOKIE_NAME;
@@ -23,6 +24,14 @@ const getSessionMaxAge = () => {
 
   return configuredValue;
 };
+
+const getSessionCookieOptions = () => ({
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: getSessionMaxAge(),
+  path: '/',
+});
 
 const createSessionMiddleware = () => {
   const { MONGODB_URI: mongoUrl, SESSION_SECRET: secret } = process.env;
@@ -43,6 +52,7 @@ const createSessionMiddleware = () => {
     mongoUrl,
     collectionName: 'sessions',
   });
+  activeStore = store;
 
   store.on('error', (error) => {
     const errorName = error?.name || 'UnknownError';
@@ -55,17 +65,34 @@ const createSessionMiddleware = () => {
     resave: false,
     saveUninitialized: false,
     store,
-    cookie: {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: getSessionMaxAge(),
-      path: '/',
-    },
+    cookie: getSessionCookieOptions(),
   });
 };
 
+const closeSessionStore = async () => {
+  const store = activeStore;
+  activeStore = null;
+
+  if (store?.collectionP) {
+    await store.collectionP;
+  }
+
+  if (store && typeof store.close === 'function') {
+    await store.close();
+  }
+};
+
+const waitForSessionStore = async () => {
+  if (activeStore?.collectionP) {
+    await activeStore.collectionP;
+  }
+};
+
 module.exports = {
+  closeSessionStore,
   createSessionMiddleware,
+  getSessionCookieOptions,
   getSessionCookieName,
+  getSessionMaxAge,
+  waitForSessionStore,
 };

@@ -11,6 +11,8 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
 const connectDatabase = require('../src/config/database');
+const { prepareCsrfHeaders } = require('./e2eCsrf');
+const { createImageFixture } = require('../testSupport/imageFixtures');
 
 process.env.NODE_ENV = 'test';
 
@@ -54,6 +56,14 @@ const request = async (pathname, options = {}) => {
   if (options.cookie) {
     headers.set('cookie', options.cookie);
   }
+
+  await prepareCsrfHeaders({
+    baseUrl,
+    cookie: options.cookie,
+    headers,
+    method: options.method,
+    skipCsrf: options.skipCsrf,
+  });
 
   const response = await fetch(`${baseUrl}${pathname}`, {
     ...options,
@@ -1758,7 +1768,7 @@ const run = async () => {
   }
   createFormData.append(
     'images',
-    new Blob([Buffer.from('jpeg-fixture')], { type: 'image/jpeg' }),
+    new Blob([createImageFixture('image/jpeg')], { type: 'image/jpeg' }),
     'fixture.jpg',
   );
   const createCrud = await request('/listings', {
@@ -1847,7 +1857,7 @@ const run = async () => {
   avatarForm.append('address', 'TP.HCM');
   avatarForm.append(
     'avatar',
-    new Blob([Buffer.from('avatar-fixture')], { type: 'image/png' }),
+    new Blob([createImageFixture('image/png')], { type: 'image/png' }),
     'avatar.png',
   );
   const avatarUpdate = await request('/profile?_method=PUT', {

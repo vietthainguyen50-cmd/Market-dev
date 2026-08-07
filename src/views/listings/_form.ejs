@@ -1,4 +1,5 @@
 <form class="listing-form" action="<%= formAction %>" method="POST" enctype="multipart/form-data">
+  <%- include('../partials/csrf') %>
   <section class="form-section" aria-labelledby="listing-basic-title">
     <div>
       <h2 class="form-section-title" id="listing-basic-title">Thông tin cơ bản</h2>

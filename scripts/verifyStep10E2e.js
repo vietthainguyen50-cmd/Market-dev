@@ -7,6 +7,7 @@ const path = require('node:path');
 const mongoose = require('mongoose');
 
 const connectDatabase = require('../src/config/database');
+const { prepareCsrfHeaders } = require('./e2eCsrf');
 
 process.env.NODE_ENV = 'test';
 
@@ -50,6 +51,14 @@ const request = async (pathname, options = {}) => {
   if (options.cookie) {
     headers.set('cookie', options.cookie);
   }
+
+  await prepareCsrfHeaders({
+    baseUrl,
+    cookie: options.cookie,
+    headers,
+    method: options.method,
+    skipCsrf: options.skipCsrf,
+  });
 
   const response = await fetch(`${baseUrl}${pathname}`, {
     ...options,

@@ -11,6 +11,8 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
 const connectDatabase = require('../src/config/database');
+const { prepareCsrfHeaders } = require('./e2eCsrf');
+const { createImageFixture } = require('../testSupport/imageFixtures');
 
 process.env.NODE_ENV = 'test';
 
@@ -67,6 +69,14 @@ const request = async (pathname, options = {}) => {
   if (options.cookie) {
     headers.set('cookie', options.cookie);
   }
+
+  await prepareCsrfHeaders({
+    baseUrl,
+    cookie: options.cookie,
+    headers,
+    method: options.method,
+    skipCsrf: options.skipCsrf,
+  });
 
   const response = await fetch(`${baseUrl}${pathname}`, {
     ...options,
@@ -753,7 +763,7 @@ const run = async () => {
       body: createCategoryForm({
         name: names[label],
         file: {
-          bytes: ONE_PIXEL_IMAGE,
+          bytes: createImageFixture(type),
           name: filename,
           type,
         },
@@ -916,7 +926,7 @@ const run = async () => {
     body: createCategoryForm({
       name: names.duplicate,
       file: {
-        bytes: ONE_PIXEL_IMAGE,
+        bytes: createImageFixture('image/jpeg'),
         name: 'duplicate.jpg',
         type: 'image/jpeg',
       },
@@ -965,7 +975,7 @@ const run = async () => {
     {
       body: createCategoryForm({
         file: {
-          bytes: ONE_PIXEL_IMAGE,
+          bytes: createImageFixture('image/webp'),
           name: 'replacement.webp',
           type: 'image/webp',
         },
@@ -1075,7 +1085,7 @@ const run = async () => {
       {
         body: createCategoryForm({
           file: {
-            bytes: ONE_PIXEL_IMAGE,
+            bytes: createImageFixture('image/jpeg'),
             name: 'database-failure.jpg',
             type: 'image/jpeg',
           },

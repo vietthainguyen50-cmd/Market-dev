@@ -12,6 +12,11 @@
     "test:e2e:admin": "node scripts/verifyStep12E2e.js",
     "test:e2e:category-image": "node scripts/verifyCategoryImageE2e.js",
     "test:e2e:profile": "node scripts/verifyStep9E2e.js",
+    "test:e2e:step13": "node scripts/verifyStep13E2e.js",
+    "test:production": "node scripts/verifyProductionStartup.js",
+    "test:all": "npm test && npm run test:e2e:profile && npm run test:e2e:favorite && npm run test:e2e:messages && npm run test:e2e:admin && npm run test:e2e:category-image && npm run test:e2e:step13 && npm run test:production",
+    "audit:data": "node scripts/auditData.js",
+    "cleanup:orphans": "node scripts/cleanupOrphans.js --dry-run",
     "seed:categories": "node scripts/seedCategories.js"
   },
   "keywords": [
@@ -25,9 +30,11 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "connect-mongo": "^6.0.0",
+    "csrf-sync": "^4.2.1",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.2",
     "helmet": "^8.3.0",

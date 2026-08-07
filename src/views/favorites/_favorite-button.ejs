@@ -36,6 +36,7 @@
     method="POST"
     action="/listings/<%= listing._id %>/favorite<%= favoriteIsSaved ? '?_method=DELETE' : '' %>"
   >
+    <%- include('../partials/csrf') %>
     <input type="hidden" name="returnTo" value="<%= favoriteReturnPath %>">
     <button
       class="favorite-button <%= favoriteCompact ? 'favorite-button--compact' : 'favorite-button--detail' %> <%= favoriteIsSaved ? 'is-favorited' : '' %>"

@@ -7,6 +7,9 @@ const {
   deleteStoredAvatar,
   uploadedAvatarToPublicPath,
 } = require('../utils/avatarStorage');
+const {
+  validateUploadedImageFile,
+} = require('../utils/imageSignature');
 
 const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
 const AVATAR_MIME_TYPE_EXTENSIONS = {
@@ -74,7 +77,30 @@ const getAvatarUploadErrorMessage = (error) => {
 const uploadAvatar = (req, res, next) => {
   avatarUpload(req, res, (error) => {
     if (!error) {
-      return next();
+      if (!req.file) {
+        return next();
+      }
+
+      return validateUploadedImageFile(req.file)
+        .then(async (isValid) => {
+          if (isValid) {
+            return next();
+          }
+
+          await deleteStoredAvatar(uploadedAvatarToPublicPath(req.file));
+          req.file = undefined;
+          req.avatarUploadError = {
+            code: 'INVALID_AVATAR_CONTENT',
+            message:
+              'Nội dung file không khớp định dạng JPG, PNG hoặc WEBP.',
+          };
+          return next();
+        })
+        .catch(async (validationError) => {
+          await deleteStoredAvatar(uploadedAvatarToPublicPath(req.file));
+          req.file = undefined;
+          return next(validationError);
+        });
     }
 
     const storedPath = uploadedAvatarToPublicPath(req.file);

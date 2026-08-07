@@ -313,7 +313,7 @@ test('route/view profile không chứa userId hoặc input field bị cấm', ()
   assert.match(route, /router\.get\('\/profile\/edit', requireAuth/);
   assert.match(
     route,
-    /router\.put\(\s*'\/profile',\s*requireAuth,\s*uploadAvatar,\s*updateProfileValidator/s,
+    /router\.put\(\s*'\/profile',\s*requireAuth,\s*uploadAvatar,\s*multipartCsrfProtection,\s*updateProfileValidator/s,
   );
   assert.doesNotMatch(route, /profile\/:userId/);
   assert.match(editView, /enctype="multipart\/form-data"/);

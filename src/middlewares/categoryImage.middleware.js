@@ -7,6 +7,9 @@ const {
   deleteStoredCategoryImage,
   uploadedCategoryImageToPublicPath,
 } = require('../utils/categoryImageStorage');
+const {
+  validateUploadedImageFile,
+} = require('../utils/imageSignature');
 
 const MAX_CATEGORY_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
 const CATEGORY_IMAGE_MIME_TYPE_EXTENSIONS = {
@@ -75,7 +78,34 @@ const getCategoryImageUploadErrorMessage = (error) => {
 const uploadCategoryImage = (req, res, next) => {
   categoryImageUpload(req, res, (error) => {
     if (!error) {
-      return next();
+      if (!req.file) {
+        return next();
+      }
+
+      return validateUploadedImageFile(req.file)
+        .then(async (isValid) => {
+          if (isValid) {
+            return next();
+          }
+
+          await deleteStoredCategoryImage(
+            uploadedCategoryImageToPublicPath(req.file),
+          );
+          req.file = undefined;
+          req.categoryImageUploadError = {
+            code: 'INVALID_CATEGORY_IMAGE_CONTENT',
+            message:
+              'Nội dung file không khớp định dạng JPG, PNG hoặc WEBP.',
+          };
+          return next();
+        })
+        .catch(async (validationError) => {
+          await deleteStoredCategoryImage(
+            uploadedCategoryImageToPublicPath(req.file),
+          );
+          req.file = undefined;
+          return next(validationError);
+        });
     }
 
     const storedPath = uploadedCategoryImageToPublicPath(req.file);

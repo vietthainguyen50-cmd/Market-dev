@@ -23,33 +23,35 @@ và thao tác mua bán hơn hiệu ứng trang trí.
 
 ## Theme
 
-NTT Cobalt, kế thừa trực tiếp nền Hallmark đã có ở trang chi tiết Listing.
+Marketplace Orange, trích xuất từ file Figma Make do người dùng cung cấp và tinh chỉnh
+độ tương phản cho giao diện production.
 
-- `--color-paper`: `oklch(98% 0.008 250)`
-- `--color-paper-2`: `oklch(95% 0.012 250)`
-- `--color-paper-3`: `oklch(91% 0.015 250)`
-- `--color-ink`: `oklch(20% 0.025 255)`
-- `--color-ink-2`: `oklch(34% 0.025 255)`
-- `--color-rule`: `oklch(72% 0.018 250)`
-- `--color-rule-2`: `oklch(86% 0.014 250)`
-- `--color-accent`: `oklch(52% 0.19 255)`
-- `--color-focus`: `oklch(30% 0.16 255)`
+- `--color-paper`: `oklch(99% 0.004 65)`
+- `--color-paper-2`: `oklch(97.5% 0.006 65)`
+- `--color-paper-3`: `oklch(95% 0.01 65)`
+- `--color-ink`: `oklch(20% 0.01 50)`
+- `--color-ink-2`: `oklch(31% 0.012 55)`
+- `--color-rule`: `oklch(74% 0.012 65)`
+- `--color-rule-2`: `oklch(92% 0.008 65)`
+- `--color-accent`: `oklch(57.19% 0.177 40.7)`
+- `--color-focus`: `oklch(20% 0.01 50)`
 
-Accent cobalt chỉ đóng vai trò tín hiệu: CTA chính, link, active state và focus.
+Accent cam đóng vai trò nhận diện marketplace: header, CTA chính, link và active state.
+Focus dùng màu mực đậm để đạt độ tương phản rõ trên nền cam và nền sáng.
 Success, warning, danger, info, sold và hidden là màu semantic; không dùng làm
 mảng trang trí.
 
 ## Typography
 
-- Display: Bahnschrift, weight 700, style normal.
-- Body: Aptos, weight 400.
-- Outlier: Cascadia Mono, weight 700; chỉ dùng cho giá và số liệu ngắn.
-- Display tracking: `-0.025em`.
+- Display: Geist Variable, weight 700, style normal.
+- Body: Inter Variable, weight 400.
+- Outlier: Inter Variable với `tabular-nums`; dùng cho giá và số liệu ngắn.
+- Display tracking: `-0.02em`.
 - Type scale: major third 1.25; body tối thiểu `1rem`.
 - Heading luôn upright; body copy giới hạn khoảng `65ch`.
 
-Không tải font ngoài. Đây là chủ ý để giữ tốc độ, CSP hiện tại và nền system-font
-đã được người dùng chấp thuận.
+Geist Variable và Inter Variable được tải từ jsDelivr, là nguồn đã được CSP hiện tại
+cho phép; fallback vẫn dùng Segoe UI và system-ui nếu CDN không khả dụng.
 
 ## Spacing
 
@@ -78,7 +80,7 @@ Bootstrap utility tương ứng; CSS mới không lặp lại các giá trị sp
 
 ## CTA voice
 
-- Primary: cobalt fill, góc vừa, động từ cụ thể.
+- Primary: cam marketplace fill, góc vừa, động từ cụ thể.
 - Secondary: nền trong suốt, border rõ.
 - Danger: chỉ cho thao tác ẩn/xóa; không dùng như CTA trang trí.
 - Affordance luôn một dòng và có hit target tối thiểu 44 px.
@@ -93,7 +95,7 @@ Bootstrap utility tương ứng; CSS mới không lặp lại các giá trị sp
 ## What pages MUST share
 
 - Wordmark NTT Marketplace và brand mark.
-- Cobalt accent, typography, button/form voice và focus ring.
+- Marketplace Orange accent, Geist/Inter typography, button/form voice và focus ring.
 - Header/footer, section heading, card, badge, alert, empty state và pagination.
 - Token semantic từ `src/public/css/tokens.css`.
 
@@ -113,22 +115,23 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
 
 ```css
 :root {
-  --color-paper: oklch(98% 0.008 250);
-  --color-paper-2: oklch(95% 0.012 250);
-  --color-paper-3: oklch(91% 0.015 250);
-  --color-rule: oklch(72% 0.018 250);
-  --color-rule-2: oklch(86% 0.014 250);
-  --color-muted: oklch(45% 0.02 255);
-  --color-neutral: oklch(38% 0.022 255);
-  --color-ink-2: oklch(34% 0.025 255);
-  --color-ink: oklch(20% 0.025 255);
-  --color-accent: oklch(52% 0.19 255);
-  --color-accent-ink: oklch(98% 0.008 250);
-  --color-focus: oklch(30% 0.16 255);
+  --color-paper: oklch(99% 0.004 65);
+  --color-paper-2: oklch(97.5% 0.006 65);
+  --color-paper-3: oklch(95% 0.01 65);
+  --color-rule: oklch(74% 0.012 65);
+  --color-rule-2: oklch(92% 0.008 65);
+  --color-muted: oklch(50% 0.015 60);
+  --color-neutral: oklch(40% 0.015 60);
+  --color-ink-2: oklch(31% 0.012 55);
+  --color-ink: oklch(20% 0.01 50);
+  --color-accent: oklch(57.19% 0.177 40.7);
+  --color-accent-soft: oklch(97.06% 0.0195 65.1);
+  --color-accent-ink: oklch(99% 0.004 65);
+  --color-focus: oklch(20% 0.01 50);
 
-  --font-display: Bahnschrift, "Arial Narrow", "Aptos Display", sans-serif;
-  --font-body: Aptos, "Segoe UI", system-ui, sans-serif;
-  --font-outlier: "Cascadia Mono", "SFMono-Regular", ui-monospace, monospace;
+  --font-display: "Geist Variable", Geist, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter Variable", Inter, "Segoe UI", system-ui, sans-serif;
+  --font-outlier: "Inter Variable", Inter, "Segoe UI", system-ui, sans-serif;
 
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
@@ -156,7 +159,7 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
   --dur-short: 220ms;
   --dur-long: 420ms;
 
-  --radius-card: 0.75rem;
+  --radius-card: 0.5rem;
   --radius-pill: 999px;
   --radius-input: 0.375rem;
 }
@@ -166,21 +169,22 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
 
 ```css
 @theme {
-  --color-paper: oklch(98% 0.008 250);
-  --color-paper-2: oklch(95% 0.012 250);
-  --color-paper-3: oklch(91% 0.015 250);
-  --color-rule: oklch(72% 0.018 250);
-  --color-rule-2: oklch(86% 0.014 250);
-  --color-muted: oklch(45% 0.02 255);
-  --color-neutral: oklch(38% 0.022 255);
-  --color-ink-2: oklch(34% 0.025 255);
-  --color-ink: oklch(20% 0.025 255);
-  --color-accent: oklch(52% 0.19 255);
-  --color-focus: oklch(30% 0.16 255);
+  --color-paper: oklch(99% 0.004 65);
+  --color-paper-2: oklch(97.5% 0.006 65);
+  --color-paper-3: oklch(95% 0.01 65);
+  --color-rule: oklch(74% 0.012 65);
+  --color-rule-2: oklch(92% 0.008 65);
+  --color-muted: oklch(50% 0.015 60);
+  --color-neutral: oklch(40% 0.015 60);
+  --color-ink-2: oklch(31% 0.012 55);
+  --color-ink: oklch(20% 0.01 50);
+  --color-accent: oklch(57.19% 0.177 40.7);
+  --color-accent-soft: oklch(97.06% 0.0195 65.1);
+  --color-focus: oklch(20% 0.01 50);
 
-  --font-display: Bahnschrift, "Arial Narrow", "Aptos Display", sans-serif;
-  --font-body: Aptos, "Segoe UI", system-ui, sans-serif;
-  --font-outlier: "Cascadia Mono", "SFMono-Regular", ui-monospace, monospace;
+  --font-display: "Geist Variable", Geist, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter Variable", Inter, "Segoe UI", system-ui, sans-serif;
+  --font-outlier: "Inter Variable", Inter, "Segoe UI", system-ui, sans-serif;
 
   --spacing-3xs: 0.125rem;
   --spacing-2xs: 0.25rem;
@@ -199,7 +203,7 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
   --text-xl: 1.9531rem;
   --text-2xl: 2.4414rem;
 
-  --radius-card: 0.75rem;
+  --radius-card: 0.5rem;
   --radius-pill: 999px;
   --radius-input: 0.375rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -214,22 +218,23 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
 {
   "$schema": "https://design-tokens.github.io/community-group/format/",
   "color": {
-    "paper": { "$value": "oklch(98% 0.008 250)", "$type": "color" },
-    "paper-2": { "$value": "oklch(95% 0.012 250)", "$type": "color" },
-    "paper-3": { "$value": "oklch(91% 0.015 250)", "$type": "color" },
-    "rule": { "$value": "oklch(72% 0.018 250)", "$type": "color" },
-    "rule-2": { "$value": "oklch(86% 0.014 250)", "$type": "color" },
-    "muted": { "$value": "oklch(45% 0.02 255)", "$type": "color" },
-    "neutral": { "$value": "oklch(38% 0.022 255)", "$type": "color" },
-    "ink-2": { "$value": "oklch(34% 0.025 255)", "$type": "color" },
-    "ink": { "$value": "oklch(20% 0.025 255)", "$type": "color" },
-    "accent": { "$value": "oklch(52% 0.19 255)", "$type": "color" },
-    "focus": { "$value": "oklch(30% 0.16 255)", "$type": "color" }
+    "paper": { "$value": "oklch(99% 0.004 65)", "$type": "color" },
+    "paper-2": { "$value": "oklch(97.5% 0.006 65)", "$type": "color" },
+    "paper-3": { "$value": "oklch(95% 0.01 65)", "$type": "color" },
+    "rule": { "$value": "oklch(74% 0.012 65)", "$type": "color" },
+    "rule-2": { "$value": "oklch(92% 0.008 65)", "$type": "color" },
+    "muted": { "$value": "oklch(50% 0.015 60)", "$type": "color" },
+    "neutral": { "$value": "oklch(40% 0.015 60)", "$type": "color" },
+    "ink-2": { "$value": "oklch(31% 0.012 55)", "$type": "color" },
+    "ink": { "$value": "oklch(20% 0.01 50)", "$type": "color" },
+    "accent": { "$value": "oklch(57.19% 0.177 40.7)", "$type": "color" },
+    "accent-soft": { "$value": "oklch(97.06% 0.0195 65.1)", "$type": "color" },
+    "focus": { "$value": "oklch(20% 0.01 50)", "$type": "color" }
   },
   "font": {
-    "display": { "$value": "Bahnschrift, Arial Narrow, Aptos Display, sans-serif", "$type": "fontFamily" },
-    "body": { "$value": "Aptos, Segoe UI, system-ui, sans-serif", "$type": "fontFamily" },
-    "outlier": { "$value": "Cascadia Mono, SFMono-Regular, ui-monospace, monospace", "$type": "fontFamily" }
+    "display": { "$value": "Geist Variable, Geist, Segoe UI, system-ui, sans-serif", "$type": "fontFamily" },
+    "body": { "$value": "Inter Variable, Inter, Segoe UI, system-ui, sans-serif", "$type": "fontFamily" },
+    "outlier": { "$value": "Inter Variable, Inter, Segoe UI, system-ui, sans-serif", "$type": "fontFamily" }
   },
   "space": {
     "3xs": { "$value": "0.125rem", "$type": "dimension" },
@@ -254,26 +259,25 @@ Các block dưới đây là bản portable. Nguồn chạy thật của dự á
 
 ```css
 :root {
-  --background: 98% 0.008 250;
-  --foreground: 20% 0.025 255;
-  --card: 95% 0.012 250;
-  --card-foreground: 20% 0.025 255;
-  --popover: 95% 0.012 250;
-  --popover-foreground: 20% 0.025 255;
-  --primary: 52% 0.19 255;
-  --primary-foreground: 98% 0.008 250;
-  --secondary: 91% 0.015 250;
-  --secondary-foreground: 34% 0.025 255;
-  --muted: 86% 0.014 250;
-  --muted-foreground: 45% 0.02 255;
-  --accent: 52% 0.19 255;
-  --accent-foreground: 98% 0.008 250;
+  --background: 99% 0.004 65;
+  --foreground: 20% 0.01 50;
+  --card: 97.5% 0.006 65;
+  --card-foreground: 20% 0.01 50;
+  --popover: 97.5% 0.006 65;
+  --popover-foreground: 20% 0.01 50;
+  --primary: 57.19% 0.177 40.7;
+  --primary-foreground: 99% 0.004 65;
+  --secondary: 95% 0.01 65;
+  --secondary-foreground: 31% 0.012 55;
+  --muted: 92% 0.008 65;
+  --muted-foreground: 50% 0.015 60;
+  --accent: 57.19% 0.177 40.7;
+  --accent-foreground: 99% 0.004 65;
   --destructive: 48% 0.17 28;
-  --destructive-foreground: 98% 0.008 250;
-  --border: 86% 0.014 250;
-  --input: 86% 0.014 250;
-  --ring: 30% 0.16 255;
-  --radius: 0.75rem;
+  --destructive-foreground: 99% 0.004 65;
+  --border: 92% 0.008 65;
+  --input: 92% 0.008 65;
+  --ring: 20% 0.01 50;
+  --radius: 0.5rem;
 }
 ```
-

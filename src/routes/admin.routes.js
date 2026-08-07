@@ -3,6 +3,7 @@ const express = require('express');
 const adminDashboardController = require('../controllers/adminDashboard.controller');
 const adminListingController = require('../controllers/adminListing.controller');
 const adminUserController = require('../controllers/adminUser.controller');
+const { adminMutationLimiter } = require('../config/rateLimit');
 const { requireAdmin } = require('../middlewares/admin.middleware');
 const { requireAuth } = require('../middlewares/auth.middleware');
 const {
@@ -35,16 +36,19 @@ router.get(
 );
 router.patch(
   '/users/:id/approve',
+  adminMutationLimiter,
   adminUserIdValidator,
   adminUserController.approveUser,
 );
 router.patch(
   '/users/:id/block',
+  adminMutationLimiter,
   blockUserValidator,
   adminUserController.blockUser,
 );
 router.patch(
   '/users/:id/unblock',
+  adminMutationLimiter,
   adminUserIdValidator,
   adminUserController.unblockUser,
 );
@@ -61,11 +65,13 @@ router.get(
 );
 router.patch(
   '/listings/:id/hide',
+  adminMutationLimiter,
   hideListingValidator,
   adminListingController.hideListing,
 );
 router.patch(
   '/listings/:id/restore',
+  adminMutationLimiter,
   adminListingIdValidator,
   adminListingController.restoreListing,
 );

@@ -1,6 +1,7 @@
 const express = require('express');
 
 const profileController = require('../controllers/profile.controller');
+const { multipartCsrfProtection } = require('../config/csrf');
 const { uploadAvatar } = require('../middlewares/avatar.middleware');
 const { requireAuth } = require('../middlewares/auth.middleware');
 const {
@@ -15,6 +16,7 @@ router.put(
   '/profile',
   requireAuth,
   uploadAvatar,
+  multipartCsrfProtection,
   updateProfileValidator,
   profileController.updateProfile,
 );

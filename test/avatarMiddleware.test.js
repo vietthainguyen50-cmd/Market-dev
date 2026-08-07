@@ -13,6 +13,7 @@ const {
   deleteStoredAvatar,
   uploadedAvatarToPublicPath,
 } = require('../src/utils/avatarStorage');
+const { createImageFixture } = require('../testSupport/imageFixtures');
 
 let baseUrl;
 let server;
@@ -98,7 +99,7 @@ test('upload.single avatar nhận JPG, PNG và WEBP', async () => {
     const result = await sendFiles([
       {
         ...fixture,
-        bytes: Buffer.from(`valid-${fixture.type}`),
+        bytes: createImageFixture(fixture.type),
       },
     ]);
 
@@ -108,6 +109,27 @@ test('upload.single avatar nhận JPG, PNG và WEBP', async () => {
       /^\/uploads\/avatars\/[0-9a-f-]+\.(jpg|png|webp)$/i,
     );
     assert.equal(await deleteStoredAvatar(result.body.path), true);
+  }
+});
+
+test('từ chối HTML hoặc JavaScript giả MIME ảnh và cleanup file', async () => {
+  for (const fixture of [
+    {
+      bytes: Buffer.from('<script>alert(1)</script>'),
+      name: 'payload.jpg',
+      type: 'image/jpeg',
+    },
+    {
+      bytes: Buffer.from('console.log("payload")'),
+      name: 'payload.png',
+      type: 'image/png',
+    },
+  ]) {
+    const result = await sendFiles([fixture]);
+
+    assert.equal(result.status, 422);
+    assert.equal(result.body.code, 'INVALID_AVATAR_CONTENT');
+    assert.equal(await findFixtureContent(fixture.bytes), false);
   }
 });
 

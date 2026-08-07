@@ -155,6 +155,7 @@
                   </a>
                 <% } else if (listing.status === 'active' && currentUser) { %>
                   <form method="POST" action="/listings/<%= listing._id %>/conversations">
+                    <%- include('../partials/csrf') %>
                     <button class="btn btn-primary" type="submit">
                       Nhắn tin cho người bán
                     </button>

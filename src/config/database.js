@@ -1,12 +1,6 @@
 const dns = require('node:dns');
 const mongoose = require('mongoose');
 
-const sanitizeErrorMessage = (message) =>
-  String(message).replace(
-    /(mongodb(?:\+srv)?:\/\/)([^@\s]+)@/gi,
-    '$1***:***@',
-  );
-
 const configureDnsServers = () => {
   const dnsServers = process.env.MONGODB_DNS_SERVERS
     ?.split(',')
@@ -34,15 +28,11 @@ const connectDatabase = async () => {
       serverSelectionTimeoutMS: 10000,
     });
 
-    const { host, name } = connection.connection;
-    console.log(`MongoDB connected successfully (${host}/${name})`);
+    console.log('MongoDB connected successfully');
 
     return connection;
   } catch (error) {
-    console.error(
-      'MongoDB connection failed:',
-      sanitizeErrorMessage(error.message),
-    );
+    console.error(`MongoDB connection failed (${error?.name || 'UnknownError'})`);
     throw error;
   }
 };

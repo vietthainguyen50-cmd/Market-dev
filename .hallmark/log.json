@@ -1,5 +1,13 @@
 [
   {
+    "date": "2026-08-07",
+    "scope": "app",
+    "macrostructure": "Ecosystem Index / Catalogue / Workbench",
+    "theme": "studied-DNA (Figma marketplace export)",
+    "enrichment": "user-supplied product and category imagery",
+    "brief": "UI-only marketplace refresh · Inter typography, orange commerce chrome and compact home"
+  },
+  {
     "date": "2026-07-29",
     "scope": "app-page",
     "macrostructure": "Catalogue / Workbench category ledger",

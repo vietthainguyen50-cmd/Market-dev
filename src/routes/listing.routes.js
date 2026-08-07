@@ -1,6 +1,7 @@
 const express = require('express');
 
 const listingController = require('../controllers/listing.controller');
+const { multipartCsrfProtection } = require('../config/csrf');
 const { requireAuth } = require('../middlewares/auth.middleware');
 const {
   loadListing,
@@ -30,6 +31,7 @@ router.post(
   '/listings',
   requireAuth,
   uploadListingImages,
+  multipartCsrfProtection,
   createListingValidator,
   listingController.createListing,
 );
@@ -47,6 +49,7 @@ router.put(
   loadListing,
   requireListingOwnerOrAdmin,
   uploadListingImages,
+  multipartCsrfProtection,
   updateListingValidator,
   listingController.updateListing,
 );

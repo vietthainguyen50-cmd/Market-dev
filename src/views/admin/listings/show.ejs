@@ -73,6 +73,7 @@
 
         <% if (listing.status === 'active' || listing.status === 'sold') { %>
           <form class="admin-action-form" method="POST" action="/admin/listings/<%= listing._id %>/hide?_method=PATCH">
+            <%- include('../../partials/csrf') %>
             <label for="moderationReason">Lý do kiểm duyệt</label>
             <textarea
               class="form-control<%= errors.reason ? ' is-invalid' : '' %>"
@@ -89,6 +90,7 @@
           </form>
         <% } else if (listing.isHiddenByAdmin) { %>
           <form method="POST" action="/admin/listings/<%= listing._id %>/restore?_method=PATCH">
+            <%- include('../../partials/csrf') %>
             <button class="btn btn-outline-success" type="submit">Khôi phục bài đăng</button>
           </form>
         <% } else { %>

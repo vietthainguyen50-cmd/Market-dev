@@ -10,11 +10,13 @@
 
   <% if (listing.status === 'active') { %>
     <form method="POST" action="/listings/<%= listing._id %>/status?_method=PATCH">
+      <%- include('../partials/csrf') %>
       <input type="hidden" name="status" value="sold">
       <button class="btn btn-outline-success" type="submit">Đánh dấu đã bán</button>
     </form>
   <% } else { %>
     <form method="POST" action="/listings/<%= listing._id %>/status?_method=PATCH">
+      <%- include('../partials/csrf') %>
       <input type="hidden" name="status" value="active">
       <button class="btn btn-outline-success" type="submit">Đăng bán lại</button>
     </form>
@@ -22,6 +24,7 @@
 
   <% if (listing.status !== 'hidden') { %>
     <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+      <%- include('../partials/csrf') %>
       <button class="btn btn-outline-danger" type="submit">Ẩn bài đăng</button>
     </form>
   <% } %>

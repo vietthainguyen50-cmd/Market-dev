@@ -13,6 +13,7 @@ const {
   deleteStoredCategoryImage,
   uploadedCategoryImageToPublicPath,
 } = require('../src/utils/categoryImageStorage');
+const { createImageFixture } = require('../testSupport/imageFixtures');
 
 let baseUrl;
 let server;
@@ -94,7 +95,7 @@ test('upload.single image nhận JPG, PNG và WEBP bằng UUID MIME', async () =
     const result = await sendFiles([
       {
         ...fixture,
-        bytes: Buffer.from(`valid-${fixture.type}`),
+        bytes: createImageFixture(fixture.type),
       },
     ]);
 
@@ -108,6 +109,21 @@ test('upload.single image nhận JPG, PNG và WEBP bằng UUID MIME', async () =
     );
     assert.equal(await deleteStoredCategoryImage(result.body.path), true);
   }
+});
+
+test('từ chối nội dung script giả MIME ảnh Category và cleanup file', async () => {
+  const marker = Buffer.from('<script>category-payload</script>');
+  const result = await sendFiles([
+    {
+      bytes: marker,
+      name: 'category.jpg',
+      type: 'image/jpeg',
+    },
+  ]);
+
+  assert.equal(result.status, 422);
+  assert.equal(result.body.code, 'INVALID_CATEGORY_IMAGE_CONTENT');
+  assert.equal(await findFixtureContent(marker), false);
 });
 
 test('từ chối ảnh lớn hơn 3 MB và không để file mồ côi', async () => {

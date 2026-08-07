@@ -9,6 +9,8 @@ const LISTING_UPLOAD_DIRECTORY = path.resolve(
   'listings',
 );
 const LISTING_UPLOAD_PUBLIC_PREFIX = '/uploads/listings/';
+const LISTING_IMAGE_FILENAME_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
 
 const isListingImagePublicPath = (publicPath) => {
   if (
@@ -21,7 +23,7 @@ const isListingImagePublicPath = (publicPath) => {
   const filename = publicPath.slice(LISTING_UPLOAD_PUBLIC_PREFIX.length);
 
   return (
-    /^[0-9a-f-]+\.(jpg|png|webp)$/i.test(filename) &&
+    LISTING_IMAGE_FILENAME_PATTERN.test(filename) &&
     filename === path.basename(filename) &&
     !filename.includes('\\')
   );
@@ -93,6 +95,7 @@ const normalizeRemoveImages = (value) => {
 module.exports = {
   LISTING_UPLOAD_DIRECTORY,
   LISTING_UPLOAD_PUBLIC_PREFIX,
+  LISTING_IMAGE_FILENAME_PATTERN,
   deleteStoredFile,
   deleteStoredFiles,
   isListingImagePublicPath,

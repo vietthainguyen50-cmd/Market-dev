@@ -1,6 +1,10 @@
 const express = require('express');
 
 const messageController = require('../controllers/message.controller');
+const {
+  conversationLimiter,
+  messageLimiter,
+} = require('../config/rateLimit');
 const { requireAuth } = require('../middlewares/auth.middleware');
 const {
   conversationIdValidator,
@@ -28,12 +32,14 @@ router.get(
 router.post(
   '/listings/:id/conversations',
   requireAuth,
+  conversationLimiter,
   listingConversationValidator,
   messageController.startConversation,
 );
 router.post(
   '/messages/:conversationId',
   requireAuth,
+  messageLimiter,
   conversationIdValidator,
   sendMessageValidator,
   messageController.sendMessage,

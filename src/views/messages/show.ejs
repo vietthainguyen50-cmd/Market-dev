@@ -115,6 +115,7 @@
         method="POST"
         action="/messages/<%= conversation.id %>"
       >
+        <%- include('../partials/csrf') %>
         <div class="message-compose-heading">
           <label for="messageContent">Nội dung tin nhắn</label>
           <span>Tối đa 2.000 ký tự</span>

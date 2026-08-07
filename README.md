@@ -501,3 +501,51 @@ Verifier tạo riêng admin, user, Category có/không có ảnh cùng các fixt
 ## Trạng thái dự án
 
 Bước 12.1 đã bổ sung upload, thay và xóa ảnh Category có cleanup an toàn, public Catalogue dùng ảnh 16:9 hoặc icon fallback, còn Home giữ icon compact. Dashboard Admin, quản lý vòng đời tài khoản `pending`/`active`/`blocked`, kiểm duyệt Listing, Message riêng tư, Favorite, auth, session, Listing CRUD, upload ảnh, soft delete, tìm kiếm/phân trang và Profile tiếp tục được giữ nguyên. Dự án chưa có đổi email, đổi mật khẩu, hồ sơ người bán công khai, Cloudinary, S3, Atlas Search, Elasticsearch, JWT, Socket.IO/WebSocket, notification, gửi ảnh/file trong chat hoặc thanh toán.
+
+## Bước 13 — Security hardening và production readiness
+
+Bước 13 giữ nguyên nghiệp vụ và giao diện, đồng thời bổ sung:
+
+- CSRF token theo session cho toàn bộ form thay đổi dữ liệu, kể cả multipart upload.
+- Rate limiter riêng cho auth, tạo Conversation, gửi Message và thao tác Admin nhạy cảm.
+- Session fixation protection, cookie theo môi trường, `TRUST_PROXY` tường minh và validation env production.
+- Helmet/CSP, request body limit, health check và graceful shutdown.
+- Kiểm tra magic-byte JPEG/PNG/WEBP, UUID filename và cleanup file khi upload/CSRF lỗi.
+- Audit orphan document/file chỉ đọc và cleanup script mặc định dry-run.
+- Full regression qua unit test, các E2E cũ và verifier Step 13.
+
+### Lệnh phát triển, test và production
+
+```bash
+# Development
+npm install
+npm run dev
+
+# Test toàn hệ thống
+npm test
+npm run test:all
+
+# Production
+npm ci
+npm run test:all
+npm start
+```
+
+Audit dữ liệu không thay đổi database:
+
+```bash
+npm run audit:data
+npm run cleanup:orphans
+```
+
+`npm run cleanup:orphans` chỉ in kế hoạch dry-run. Không chạy `--apply` nếu chưa backup và review từng ID/path.
+
+### Cấu hình production
+
+Production bắt buộc có `MONGODB_URI` và `SESSION_SECRET` tối thiểu 32 ký tự. Cookie chỉ bật `Secure` khi `NODE_ENV=production`; HTTPS và `TRUST_PROXY` phải được cấu hình đúng tại reverse proxy. `TRUST_PROXY=0` phù hợp khi Node nhận kết nối trực tiếp; nếu qua proxy, đặt số hop tin cậy thay vì bật vô điều kiện.
+
+Health endpoint: `GET /healthz` chỉ trả `{"status":"ok"}`.
+
+Upload hiện lưu trên local filesystem. Cách này phù hợp development, demo local hoặc server có persistent disk. Trên hosting filesystem tạm thời/ephemeral, phải gắn persistent disk hoặc dùng object storage như Cloudinary/S3-compatible trước khi nhận dữ liệu thật.
+
+Checklist triển khai chi tiết: [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).

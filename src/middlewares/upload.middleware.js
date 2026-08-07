@@ -7,6 +7,9 @@ const {
   deleteStoredFiles,
   uploadedFilesToPublicPaths,
 } = require('../utils/fileStorage');
+const {
+  validateUploadedImageFile,
+} = require('../utils/imageSignature');
 
 const MAX_LISTING_IMAGES = 5;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -69,7 +72,29 @@ const getUploadErrorMessage = (error) => {
 const uploadListingImages = (req, res, next) => {
   uploadArray(req, res, (error) => {
     if (!error) {
-      return next();
+      const uploadedFiles = Array.isArray(req.files) ? req.files : [];
+
+      return Promise.all(uploadedFiles.map(validateUploadedImageFile))
+        .then(async (validSignatures) => {
+          if (validSignatures.every(Boolean)) {
+            return next();
+          }
+
+          const storedPaths = uploadedFilesToPublicPaths(uploadedFiles);
+          await deleteStoredFiles(storedPaths);
+          req.files = [];
+          req.uploadError = {
+            code: 'INVALID_IMAGE_CONTENT',
+            message:
+              'Nội dung file không khớp định dạng JPG, PNG hoặc WEBP.',
+          };
+          return next();
+        })
+        .catch(async (validationError) => {
+          await deleteStoredFiles(uploadedFilesToPublicPaths(uploadedFiles));
+          req.files = [];
+          return next(validationError);
+        });
     }
 
     const storedPaths = uploadedFilesToPublicPaths(req.files);

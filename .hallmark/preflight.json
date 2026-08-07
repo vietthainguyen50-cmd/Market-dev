@@ -1,14 +1,14 @@
 {
-  "date": "2026-07-29",
-  "refreshed_because": "package.json changed after the previous scan; design signals are unchanged",
+  "date": "2026-08-07",
+  "refreshed_because": "user supplied a Figma Make marketplace export and requested a UI-only system refresh",
   "framework": "Express 5 + EJS + Bootstrap 5",
-  "font_stack": "Bahnschrift display, Aptos body, Cascadia Mono outlier",
+  "font_stack": "Geist Variable display with Inter Variable body and tabular price roles",
   "palette": "OKLCH custom properties in src/public/css/tokens.css",
   "motion": "motion-cut; no motion library; one existing CSS gallery entrance",
   "spacing": "4-point Hallmark scale",
   "preserve": [
-    "existing NTT cobalt palette",
-    "existing system font stack",
+    "marketplace-orange palette extracted from the supplied Figma export",
+    "Geist and Inter typography with system fallbacks",
     "existing listing-detail Workbench structure",
     "Bootstrap and current MVC boundaries"
   ]
