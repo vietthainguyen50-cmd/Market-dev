@@ -158,8 +158,217 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
+const getPublicSellerPage = (
+  sellerId,
+  page,
+) => {
+  const baseUrl =
+    `/users/${encodeURIComponent(
+      String(sellerId),
+    )}`;
+
+  return page > 1
+    ? `${baseUrl}?page=${page}`
+    : baseUrl;
+};
+
+
+const createPublicPagination = (
+  sellerId,
+  pagination,
+) => {
+  const pages = [];
+
+  const startPage = Math.max(
+    1,
+    pagination.page - 2,
+  );
+
+  const endPage = Math.min(
+    pagination.totalPages,
+    startPage + 4,
+  );
+
+  const normalizedStart =
+    Math.max(
+      1,
+      endPage - 4,
+    );
+
+  for (
+    let page = normalizedStart;
+    page <= endPage;
+    page += 1
+  ) {
+    pages.push({
+      number: page,
+
+      isCurrent:
+        page === pagination.page,
+
+      url:
+        getPublicSellerPage(
+          sellerId,
+          page,
+        ),
+    });
+  }
+
+  return {
+    ...pagination,
+
+    pages,
+
+    firstUrl:
+      pagination.page > 1
+        ? getPublicSellerPage(
+            sellerId,
+            1,
+          )
+        : null,
+
+    previousUrl:
+      pagination.hasPrev
+        ? getPublicSellerPage(
+            sellerId,
+            pagination.page - 1,
+          )
+        : null,
+
+    nextUrl:
+      pagination.hasNext
+        ? getPublicSellerPage(
+            sellerId,
+            pagination.page + 1,
+          )
+        : null,
+
+    lastUrl:
+      pagination.page <
+      pagination.totalPages
+        ? getPublicSellerPage(
+            sellerId,
+            pagination.totalPages,
+          )
+        : null,
+  };
+};
+
+
+const showPublicSellerProfile = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    /*
+     * Nếu chính chủ bấm vào hồ sơ của mình
+     * thì chuyển về trang /profile đầy đủ.
+     */
+    if (
+      req.user &&
+      String(req.user._id) ===
+        String(req.params.id)
+    ) {
+      return res.redirect(
+        302,
+        '/profile',
+      );
+    }
+
+
+    const rawPage =
+      Number.parseInt(
+        req.query.page,
+        10,
+      );
+
+    const requestedPage =
+      Number.isSafeInteger(rawPage) &&
+      rawPage > 0
+        ? rawPage
+        : 1;
+
+
+    const overview =
+      await profileService
+        .getPublicSellerOverview(
+          req.params.id,
+          requestedPage,
+        );
+
+
+    if (!overview) {
+      return next(
+        createProfileNotFoundError(),
+      );
+    }
+
+
+    /*
+     * Nếu nhập trang quá lớn:
+     * /users/id?page=999
+     */
+    if (
+      overview.pagination.totalItems > 0 &&
+      requestedPage >
+        overview.pagination.totalPages
+    ) {
+      return res.redirect(
+        302,
+        getPublicSellerPage(
+          req.params.id,
+          overview.pagination.totalPages,
+        ),
+      );
+    }
+
+
+    const seller =
+      presentProfileUser(
+        overview.seller,
+      );
+
+
+    const pagination =
+      createPublicPagination(
+        seller._id,
+        overview.pagination,
+      );
+
+
+    return res.render(
+      'profile/public',
+      {
+        pageTitle:
+          `Người bán ${seller.name}`,
+
+        seller,
+
+        stats:
+          overview.stats,
+
+        listings:
+          overview.listings.map(
+            presentListing,
+          ),
+
+        pagination,
+
+        currentPage:
+          pagination.page,
+      },
+    );
+
+  } catch (error) {
+    return next(error);
+  }
+};
+
+
 module.exports = {
   showEditProfile,
   showProfile,
+  showPublicSellerProfile,
   updateProfile,
 };

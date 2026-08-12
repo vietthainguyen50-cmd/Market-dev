@@ -1,205 +1,585 @@
 <%- include('../partials/header') %>
 
-<section class="section-space">
+
+<%
+  const selectedCategory = filters.category
+    ? categories.find(
+        (category) =>
+          category.slug === filters.category
+      )
+    : null;
+
+
+  let resultTitle = 'Tất cả sản phẩm';
+
+
+  if (
+    selectedCategory &&
+    filters.location
+  ) {
+
+    resultTitle =
+      `${selectedCategory.name} tại ${filters.location}`;
+
+  } else if (selectedCategory) {
+
+    resultTitle =
+      selectedCategory.name;
+
+  } else if (filters.location) {
+
+    resultTitle =
+      `Sản phẩm tại ${filters.location}`;
+
+  } else if (filters.keyword) {
+
+    resultTitle =
+      `Kết quả cho “${filters.keyword}”`;
+
+  }
+%>
+
+
+<section class="market-search-page">
+
   <div class="container">
-    <div class="page-heading mb-4">
-      <div>
-        <h1 class="mb-2">Tìm kiếm sản phẩm</h1>
-        <p class="text-secondary mb-0">Tìm món đồ phù hợp từ các bài đăng trong cộng đồng.</p>
+
+
+    <!-- ======================================
+         VALIDATION
+         ====================================== -->
+    <% if (Object.keys(filterErrors).length > 0) { %>
+
+      <div
+        class="alert alert-danger market-search-alert"
+        role="alert"
+      >
+
+        <strong>
+          Vui lòng kiểm tra lại bộ lọc.
+        </strong>
+
+        <ul class="mb-0 mt-2">
+
+          <% [
+            ...new Set(
+              Object.values(filterErrors)
+            )
+          ].forEach((message) => { %>
+
+            <li>
+              <%= message %>
+            </li>
+
+          <% }); %>
+
+        </ul>
+
       </div>
-      <a class="btn btn-primary" href="<%= isAuthenticated ? '/listings/create' : '/login' %>">
-        Đăng tin
-      </a>
+
+    <% } %>
+
+
+
+    <div class="market-search-layout">
+
+
+      <!-- ======================================
+           SIDEBAR DESKTOP
+           ====================================== -->
+      <aside
+        class="market-filter-sidebar d-none d-lg-block"
+        aria-label="Bộ lọc tìm kiếm"
+      >
+
+        <form
+          class="market-filter-panel"
+          method="GET"
+          action="/listings"
+          role="search"
+        >
+
+          <div class="market-filter-title-row">
+
+            <h2>
+              Bộ lọc tìm kiếm
+            </h2>
+
+            <a href="/listings">
+              Xóa lọc
+            </a>
+
+          </div>
+
+
+          <%- include(
+            '_filters',
+            {
+              idPrefix: 'desktop-filter',
+              categories,
+              filters,
+              filterErrors
+            }
+          ) %>
+
+        </form>
+
+      </aside>
+
+
+
+      <!-- ======================================
+           RESULTS
+           ====================================== -->
+      <div class="market-search-results">
+
+
+        <!-- BREADCRUMB -->
+        <nav
+          class="market-search-breadcrumb"
+          aria-label="Breadcrumb"
+        >
+
+          <a href="/">
+            Trang chủ
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+
+          <% if (selectedCategory) { %>
+
+            <a
+              href="/categories/<%= selectedCategory.slug %>"
+            >
+              <%= selectedCategory.name %>
+            </a>
+
+
+            <% if (filters.location) { %>
+
+              <span aria-hidden="true">
+                /
+              </span>
+
+              <span>
+                <%= filters.location %>
+              </span>
+
+            <% } %>
+
+          <% } else { %>
+
+            <span>
+              Sản phẩm
+            </span>
+
+          <% } %>
+
+        </nav>
+
+
+
+        <!-- ======================================
+             RESULT HEADER
+             ====================================== -->
+        <div class="market-results-header">
+
+          <div class="market-results-heading">
+
+            <h1>
+              <%= resultTitle %>
+            </h1>
+
+
+            <% if (
+              Object.keys(filterErrors).length === 0
+            ) { %>
+
+              <p data-total-items="<%= totalItems %>">
+
+                Tìm thấy
+
+                <strong>
+                  <%= totalItems %>
+                </strong>
+
+                sản phẩm
+
+              </p>
+
+            <% } else { %>
+
+              <p>
+                Điều chỉnh bộ lọc để tiếp tục tìm kiếm.
+              </p>
+
+            <% } %>
+
+          </div>
+
+
+
+          <!-- ======================================
+               TOOLS
+               ====================================== -->
+          <div class="market-results-tools">
+
+
+            <!-- MOBILE FILTER -->
+            <button
+              class="
+                btn
+                market-mobile-filter-button
+                d-lg-none
+              "
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#mobileListingFilters"
+              aria-controls="mobileListingFilters"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+
+                <path d="M4 6h16"></path>
+                <path d="M7 12h10"></path>
+                <path d="M10 18h4"></path>
+
+              </svg>
+
+              Bộ lọc
+
+            </button>
+
+
+
+            <!-- SORT -->
+            <form
+              class="market-sort-form"
+              method="GET"
+              action="/listings"
+            >
+
+              <% if (filters.keyword) { %>
+
+                <input
+                  type="hidden"
+                  name="keyword"
+                  value="<%= filters.keyword %>"
+                >
+
+              <% } %>
+
+
+              <% if (filters.category) { %>
+
+                <input
+                  type="hidden"
+                  name="category"
+                  value="<%= filters.category %>"
+                >
+
+              <% } %>
+
+
+              <% if (filters.condition) { %>
+
+                <input
+                  type="hidden"
+                  name="condition"
+                  value="<%= filters.condition %>"
+                >
+
+              <% } %>
+
+
+              <% if (filters.minPrice !== null) { %>
+
+                <input
+                  type="hidden"
+                  name="minPrice"
+                  value="<%= filters.minPrice %>"
+                >
+
+              <% } %>
+
+
+              <% if (filters.maxPrice !== null) { %>
+
+                <input
+                  type="hidden"
+                  name="maxPrice"
+                  value="<%= filters.maxPrice %>"
+                >
+
+              <% } %>
+
+
+              <% if (filters.location) { %>
+
+                <input
+                  type="hidden"
+                  name="location"
+                  value="<%= filters.location %>"
+                >
+
+              <% } %>
+
+
+              <input
+                type="hidden"
+                name="status"
+                value="<%= filters.status %>"
+              >
+
+
+              <label for="marketSort">
+                Sắp xếp:
+              </label>
+
+
+              <select
+                class="form-select"
+                id="marketSort"
+                name="sort"
+              >
+
+                <option
+                  value="newest"
+                  <%= filters.sort === 'newest'
+                    ? 'selected'
+                    : ''
+                  %>
+                >
+                  Mới nhất
+                </option>
+
+
+                <option
+                  value="oldest"
+                  <%= filters.sort === 'oldest'
+                    ? 'selected'
+                    : ''
+                  %>
+                >
+                  Cũ nhất
+                </option>
+
+
+                <option
+                  value="price-asc"
+                  <%= filters.sort === 'price-asc'
+                    ? 'selected'
+                    : ''
+                  %>
+                >
+                  Giá thấp đến cao
+                </option>
+
+
+                <option
+                  value="price-desc"
+                  <%= filters.sort === 'price-desc'
+                    ? 'selected'
+                    : ''
+                  %>
+                >
+                  Giá cao đến thấp
+                </option>
+
+              </select>
+
+
+              <button
+                class="btn market-sort-submit"
+                type="submit"
+              >
+                Áp dụng
+              </button>
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ======================================
+             PRODUCT GRID
+             ====================================== -->
+        <% if (listings.length > 0) { %>
+
+          <div class="market-results-grid">
+
+            <% listings.forEach((listing) => { %>
+
+              <%- include(
+                '_card',
+                {
+                  listing,
+                  showFavoriteAction: true,
+                  favoriteReturnTo: currentUrl
+                }
+              ) %>
+
+            <% }); %>
+
+          </div>
+
+
+          <%- include(
+            '_pagination',
+            { pagination }
+          ) %>
+
+
+        <% } else if (
+          Object.keys(filterErrors).length === 0
+        ) { %>
+
+
+          <!-- EMPTY -->
+          <div
+            class="market-search-empty"
+            role="status"
+          >
+
+            <div
+              class="market-search-empty__icon"
+              aria-hidden="true"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              >
+
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="7"
+                ></circle>
+
+                <path
+                  d="m20 20-4-4"
+                ></path>
+
+              </svg>
+
+            </div>
+
+
+            <h2>
+              Không tìm thấy sản phẩm phù hợp
+            </h2>
+
+            <p>
+              Hãy thử thay đổi từ khóa,
+              khoảng giá, địa điểm hoặc
+              xóa bộ lọc hiện tại.
+            </p>
+
+
+            <a
+              class="btn btn-primary"
+              href="/listings"
+            >
+              Xem tất cả sản phẩm
+            </a>
+
+          </div>
+
+        <% } %>
+
+
+      </div>
+
     </div>
 
-    <form class="listing-filter-panel" method="GET" action="/listings" role="search">
-      <% if (Object.keys(filterErrors).length > 0) { %>
-        <div class="alert alert-danger" role="alert">
-          <p class="fw-semibold mb-2">Vui lòng kiểm tra lại bộ lọc:</p>
-          <ul class="mb-0">
-            <% [...new Set(Object.values(filterErrors))].forEach((message) => { %>
-              <li><%= message %></li>
-            <% }); %>
-          </ul>
-        </div>
-      <% } %>
+  </div>
 
-      <fieldset class="filter-group">
-        <legend class="h5 mb-3">Từ khóa và phân loại</legend>
-        <div class="row g-3">
-        <div class="col-12 col-lg-6">
-          <label class="form-label fw-semibold" for="keyword">Từ khóa</label>
-          <input
-            class="form-control <%= filterErrors.keyword ? 'is-invalid' : '' %>"
-            id="keyword"
-            name="keyword"
-            type="text"
-            maxlength="100"
-            value="<%= filters.keyword %>"
-            placeholder="Tìm theo tên hoặc mô tả sản phẩm"
-            aria-invalid="<%= filterErrors.keyword ? 'true' : 'false' %>"
-            aria-describedby="filterKeywordError"
-          >
-          <div class="invalid-feedback field-feedback-slot" id="filterKeywordError"><%= filterErrors.keyword || '' %></div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-          <label class="form-label fw-semibold" for="category">Danh mục</label>
-          <select
-            class="form-select <%= filterErrors.category ? 'is-invalid' : '' %>"
-            id="category"
-            name="category"
-            aria-invalid="<%= filterErrors.category ? 'true' : 'false' %>"
-            aria-describedby="filterCategoryError"
-          >
-            <option value="">Tất cả danh mục</option>
-            <% categories.forEach((category) => { %>
-              <option value="<%= category.slug %>" <%= filters.category === category.slug ? 'selected' : '' %>>
-                <%= category.name %>
-              </option>
-            <% }); %>
-          </select>
-          <div class="invalid-feedback field-feedback-slot" id="filterCategoryError"><%= filterErrors.category || '' %></div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-          <label class="form-label fw-semibold" for="condition">Tình trạng</label>
-          <select
-            class="form-select <%= filterErrors.condition ? 'is-invalid' : '' %>"
-            id="condition"
-            name="condition"
-            aria-invalid="<%= filterErrors.condition ? 'true' : 'false' %>"
-            aria-describedby="filterConditionError"
-          >
-            <option value="">Tất cả tình trạng</option>
-            <option value="new" <%= filters.condition === 'new' ? 'selected' : '' %>>Mới</option>
-            <option value="used" <%= filters.condition === 'used' ? 'selected' : '' %>>Đã sử dụng</option>
-          </select>
-          <div class="invalid-feedback field-feedback-slot" id="filterConditionError"><%= filterErrors.condition || '' %></div>
-        </div>
-        </div>
-      </fieldset>
+</section>
 
-      <fieldset class="filter-group">
-        <legend class="h5 mb-3">Giá, khu vực và sắp xếp</legend>
-        <div class="row g-3">
-        <div class="col-12 col-sm-6 col-lg-3">
-          <label class="form-label fw-semibold" for="minPrice">Giá tối thiểu</label>
-          <input
-            class="form-control <%= filterErrors.minPrice || filterErrors.maxPrice ? 'is-invalid' : '' %>"
-            id="minPrice"
-            name="minPrice"
-            type="number"
-            min="0"
-            max="100000000000"
-            step="1"
-            value="<%= filters.minPrice === null ? '' : filters.minPrice %>"
-            aria-invalid="<%= filterErrors.minPrice || filterErrors.maxPrice ? 'true' : 'false' %>"
-            aria-describedby="filterMinPriceError"
-          >
-          <div class="invalid-feedback field-feedback-slot" id="filterMinPriceError"><%= filterErrors.minPrice || filterErrors.maxPrice || '' %></div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-          <label class="form-label fw-semibold" for="maxPrice">Giá tối đa</label>
-          <input
-            class="form-control <%= filterErrors.maxPrice ? 'is-invalid' : '' %>"
-            id="maxPrice"
-            name="maxPrice"
-            type="number"
-            min="0"
-            max="100000000000"
-            step="1"
-            value="<%= filters.maxPrice === null ? '' : filters.maxPrice %>"
-            aria-invalid="<%= filterErrors.maxPrice ? 'true' : 'false' %>"
-            aria-describedby="filterMaxPriceError"
-          >
-          <div class="invalid-feedback field-feedback-slot" id="filterMaxPriceError"><%= filterErrors.maxPrice || '' %></div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-          <label class="form-label fw-semibold" for="location">Địa điểm</label>
-          <input
-            class="form-control <%= filterErrors.location ? 'is-invalid' : '' %>"
-            id="location"
-            name="location"
-            type="text"
-            maxlength="150"
-            value="<%= filters.location %>"
-            placeholder="Khu vực, tỉnh hoặc thành phố"
-            aria-invalid="<%= filterErrors.location ? 'true' : 'false' %>"
-            aria-describedby="filterLocationError"
-          >
-          <div class="invalid-feedback field-feedback-slot" id="filterLocationError"><%= filterErrors.location || '' %></div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-          <label class="form-label fw-semibold" for="status">Trạng thái</label>
-          <select
-            class="form-select <%= filterErrors.status ? 'is-invalid' : '' %>"
-            id="status"
-            name="status"
-            aria-invalid="<%= filterErrors.status ? 'true' : 'false' %>"
-            aria-describedby="filterStatusError"
-          >
-            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Tất cả bài đăng</option>
-            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Đang bán</option>
-            <option value="sold" <%= filters.status === 'sold' ? 'selected' : '' %>>Đã bán</option>
-          </select>
-          <div class="invalid-feedback field-feedback-slot" id="filterStatusError"><%= filterErrors.status || '' %></div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-          <label class="form-label fw-semibold" for="sort">Sắp xếp</label>
-          <select
-            class="form-select <%= filterErrors.sort ? 'is-invalid' : '' %>"
-            id="sort"
-            name="sort"
-            aria-invalid="<%= filterErrors.sort ? 'true' : 'false' %>"
-            aria-describedby="filterSortError"
-          >
-            <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Mới nhất</option>
-            <option value="oldest" <%= filters.sort === 'oldest' ? 'selected' : '' %>>Cũ nhất</option>
-            <option value="price-asc" <%= filters.sort === 'price-asc' ? 'selected' : '' %>>Giá tăng dần</option>
-            <option value="price-desc" <%= filters.sort === 'price-desc' ? 'selected' : '' %>>Giá giảm dần</option>
-          </select>
-          <div class="invalid-feedback field-feedback-slot" id="filterSortError"><%= filterErrors.sort || '' %></div>
-        </div>
-        <div class="col-12 col-lg-6 filter-actions">
-          <button class="btn btn-primary flex-grow-1" type="submit">Tìm kiếm</button>
-          <a class="btn btn-outline-secondary" href="/listings">Xóa bộ lọc</a>
-        </div>
-      </div>
-      </fieldset>
+
+
+<!-- ==========================================
+     MOBILE FILTER
+     ========================================== -->
+
+<div
+  class="
+    offcanvas
+    offcanvas-start
+    market-filter-offcanvas
+  "
+  tabindex="-1"
+  id="mobileListingFilters"
+  aria-labelledby="mobileListingFiltersLabel"
+>
+
+  <div class="offcanvas-header">
+
+    <div>
+
+      <span class="market-filter-offcanvas__eyebrow">
+        NTT Marketplace
+      </span>
+
+      <h2
+        class="offcanvas-title"
+        id="mobileListingFiltersLabel"
+      >
+        Bộ lọc tìm kiếm
+      </h2>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="offcanvas"
+      aria-label="Đóng"
+    ></button>
+
+  </div>
+
+
+  <div class="offcanvas-body">
+
+    <form
+      method="GET"
+      action="/listings"
+      role="search"
+    >
+
+      <%- include(
+        '_filters',
+        {
+          idPrefix: 'mobile-filter',
+          categories,
+          filters,
+          filterErrors
+        }
+      ) %>
+
     </form>
 
-    <% if (Object.keys(filterErrors).length === 0) { %>
-      <div class="listing-results-summary d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <p class="fw-semibold mb-0" data-total-items="<%= totalItems %>">
-          Tìm thấy <%= totalItems %> sản phẩm
-        </p>
-        <% if (pagination.totalPages > 1) { %>
-          <p class="small text-secondary mb-0">Trang <%= pagination.page %> / <%= pagination.totalPages %></p>
-        <% } %>
-      </div>
-    <% } %>
-
-    <% if (listings.length > 0) { %>
-      <div class="row g-4">
-        <% listings.forEach((listing) => { %>
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <%- include('_card', {
-              listing,
-              showFavoriteAction: true,
-              favoriteReturnTo: currentUrl
-            }) %>
-          </div>
-        <% }); %>
-      </div>
-
-      <%- include('_pagination', { pagination }) %>
-    <% } else if (Object.keys(filterErrors).length === 0) { %>
-      <div class="listing-empty-state" role="status">
-        <h2 class="h4 fw-bold">Không tìm thấy sản phẩm phù hợp với bộ lọc hiện tại.</h2>
-        <p class="text-secondary">Hãy thử điều chỉnh từ khóa hoặc xóa bộ lọc để xem tất cả bài đăng.</p>
-        <a class="btn btn-outline-primary" href="/listings">Xóa bộ lọc</a>
-      </div>
-    <% } %>
   </div>
-</section>
+
+</div>
+
 
 <%- include('../partials/footer') %>

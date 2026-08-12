@@ -142,6 +142,39 @@ const getListingById = (listingId) => {
     .lean();
 };
 
+const getRelatedListings = (
+  listingId,
+  categoryId,
+  limit = 5,
+) => {
+  if (
+    !mongoose.isValidObjectId(listingId) ||
+    !mongoose.isValidObjectId(categoryId)
+  ) {
+    return [];
+  }
+
+  return populatePublicListing(
+    Listing.find({
+      _id: {
+        $ne: listingId,
+      },
+
+      category: categoryId,
+
+      status: 'active',
+    })
+      .select(
+        'title description price category seller location condition images status moderation createdAt updatedAt',
+      )
+      .sort({
+        createdAt: -1,
+        _id: -1,
+      })
+      .limit(limit),
+  ).lean();
+};
+
 const getListingDocumentById = (listingId) => {
   if (!mongoose.isValidObjectId(listingId)) {
     return null;
@@ -321,6 +354,7 @@ module.exports = {
   createListing,
   getLatestListings,
   getListingById,
+  getRelatedListings,
   getListingDocumentById,
   getListingsByCategory,
   getListingsBySeller,

@@ -45,3 +45,42 @@ document.addEventListener('DOMContentLoaded', () => {
     thumbnail.addEventListener('click', () => selectImage(thumbnail));
   });
 });
+// ==========================================================
+// HIỆN SỐ ĐIỆN THOẠI NGƯỜI BÁN
+// ==========================================================
+
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('.listing-phone-reveal');
+
+  if (!button) {
+    return;
+  }
+
+  const fullPhone = button.getAttribute('data-full-phone');
+
+  const phoneNumber = button.querySelector(
+    '.listing-phone-number',
+  );
+
+  const phoneLabel = button.querySelector(
+    '.listing-phone-label',
+  );
+
+  if (!fullPhone || !phoneNumber) {
+    return;
+  }
+
+  // Hiện số điện thoại đầy đủ
+  phoneNumber.textContent = fullPhone;
+
+  // Ẩn chữ "Hiện số"
+  if (phoneLabel) {
+    phoneLabel.style.display = 'none';
+  }
+
+  // Đánh dấu đã hiện
+  button.classList.add('is-revealed');
+
+  // Không cho xử lý reveal lần nữa
+  button.removeAttribute('data-full-phone');
+});

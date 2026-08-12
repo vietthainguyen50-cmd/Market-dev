@@ -7,7 +7,7 @@ const getHome = async (req, res, next) => {
   try {
     const [categories, latestListings] = await Promise.all([
       categoryService.getActiveCategories(),
-      listingService.getLatestListings(8),
+      listingService.getLatestListings(15),
     ]);
     const favoriteListingIds = await favoriteService.getFavoriteListingIds(
       req.user?._id,

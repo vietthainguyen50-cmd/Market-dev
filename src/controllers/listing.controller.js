@@ -139,16 +139,28 @@ const renderListingDetail = (req, res, listing, options = {}) => {
   presentedListing.sellerAvatar =
     getSafeAvatar(listing.seller?.avatar) || DEFAULT_AVATAR;
 
-  return res.status(options.statusCode || 200).render('listings/show', {
-    pageTitle: listing.title,
-    listing: presentedListing,
-    isOwner,
-    canManage,
-    errors: options.errors || {},
-    successMessage: options.successMessage || '',
-    currentUrl: req.originalUrl,
-    messageConversationId: options.messageConversationId || '',
-  });
+return res.status(options.statusCode || 200).render('listings/show', {
+  pageTitle: listing.title,
+
+  listing: presentedListing,
+
+  isOwner,
+  canManage,
+
+  errors: options.errors || {},
+
+  successMessage:
+    options.successMessage || '',
+
+  currentUrl:
+    req.originalUrl,
+
+  messageConversationId:
+    options.messageConversationId || '',
+
+  relatedListings:
+    options.relatedListings || [],
+});
 };
 
 const renderMyListings = async (req, res, options = {}) => {
@@ -287,6 +299,13 @@ const showListing = async (req, res, next) => {
     const isOwner = isListingOwner(listing, req.user);
     let isFavorited = false;
     let existingConversation = null;
+    
+    const relatedListings =
+    await listingService.getRelatedListings(
+      listing._id,
+      listing.category?._id || listing.category,
+      5,
+    );
 
     if (req.user && !isOwner && listing.status !== 'hidden') {
       [isFavorited, existingConversation] = await Promise.all([
@@ -299,12 +318,42 @@ const showListing = async (req, res, next) => {
       ]);
     }
 
-    return renderListingDetail(req, res, listing, {
-      successMessage: getDetailSuccessMessage(req.query),
-      isFavorited,
-      messageConversationId:
-        existingConversation?._id?.toString() || '',
-    });
+    const relatedFavoriteIds =
+  await favoriteService.getFavoriteListingIds(
+    req.user?._id,
+
+    relatedListings.map(
+      (relatedListing) =>
+        relatedListing._id,
+    ),
+  );
+
+  const presentedRelatedListings =
+    relatedListings.map(
+      (relatedListing) =>
+        presentListing(
+          relatedListing,
+          {
+            isFavorited:
+              relatedFavoriteIds.has(
+                relatedListing._id.toString(),
+              ),
+          },
+        ),
+    );
+
+  return renderListingDetail(req, res, listing, {
+    successMessage:
+      getDetailSuccessMessage(req.query),
+
+    isFavorited,
+
+    messageConversationId:
+      existingConversation?._id?.toString() || '',
+
+    relatedListings:
+      presentedRelatedListings,
+  });
   } catch (error) {
     return next(error);
   }

@@ -2,12 +2,13 @@
 
 <section class="section-space message-detail-page" aria-labelledby="conversation-title">
   <div class="container message-detail-container">
-    <nav class="message-back-nav" aria-label="Điều hướng tin nhắn">
-      <a href="/messages">← Tất cả tin nhắn</a>
-    </nav>
+<!-- =====================================================
+     HEADER NGƯỜI ĐANG CHAT
+    ===================================================== -->
+    <header class="conversation-header conversation-header--modern">
 
-    <header class="conversation-header">
       <div class="conversation-header-person">
+
         <img
           class="conversation-header-avatar"
           src="<%= conversation.otherParticipant.avatarUrl %>"
@@ -15,40 +16,141 @@
           width="56"
           height="56"
         >
-        <div>
-          <p>Trò chuyện với</p>
-          <h1 id="conversation-title"><%= conversation.otherParticipant.name %></h1>
-        </div>
-      </div>
-      <a class="btn btn-outline-secondary" href="/messages">Danh sách tin nhắn</a>
-    </header>
 
-    <section class="conversation-listing-context" aria-labelledby="conversation-listing-title">
-      <img
-        class="conversation-context-image"
-        src="<%= conversation.listing.primaryImage %>"
-        alt="Ảnh bài đăng <%= conversation.listing.title %>"
-        width="160"
-        height="120"
+        <div class="conversation-header-copy">
+
+          <h1 id="conversation-title">
+            <%= conversation.otherParticipant.name %>
+          </h1>
+
+        </div>
+
+      </div>
+
+
+      <a
+        class="conversation-back-button"
+        href="/messages"
       >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+
+        <span>
+          Tin nhắn
+        </span>
+
+      </a>
+
+    </header>
+    <!-- =====================================================
+        SẢN PHẨM ĐANG TRAO ĐỔI
+        ===================================================== -->
+    <section
+      class="conversation-listing-context conversation-listing-context--modern"
+      aria-labelledby="conversation-listing-title"
+    >
+
+      <div class="conversation-context-media">
+
+        <img
+          class="conversation-context-image"
+          src="<%= conversation.listing.primaryImage %>"
+          alt="Ảnh bài đăng <%= conversation.listing.title %>"
+          width="160"
+          height="120"
+        >
+
+      </div>
+
+
       <div class="conversation-context-copy">
+
         <div class="conversation-context-heading">
-          <h2 id="conversation-listing-title"><%= conversation.listing.title %></h2>
-          <span class="badge status-badge status-badge--<%= conversation.listing.status %>">
+
+          <div class="conversation-context-title">
+
+            <span class="conversation-context-kicker">
+              Sản phẩm đang trao đổi
+            </span>
+
+            <h2 id="conversation-listing-title">
+              <%= conversation.listing.title %>
+            </h2>
+
+          </div>
+
+
+          <span
+            class="
+              badge
+              status-badge
+              status-badge--<%= conversation.listing.status %>
+            "
+          >
             <%= conversation.listing.statusLabel %>
           </span>
+
         </div>
-        <% if (conversation.listing.formattedPrice) { %>
-          <p class="conversation-context-price">
-            <%= conversation.listing.formattedPrice %>
-          </p>
-        <% } %>
-        <% if (conversation.listing.detailUrl) { %>
-          <a href="<%= conversation.listing.detailUrl %>">Xem chi tiết sản phẩm</a>
-        <% } else { %>
-          <p class="conversation-hidden-note">Bài đăng đã ẩn · lịch sử trò chuyện vẫn được giữ.</p>
-        <% } %>
+
+
+        <div class="conversation-context-footer">
+
+          <% if (conversation.listing.formattedPrice) { %>
+
+            <p class="conversation-context-price">
+              <%= conversation.listing.formattedPrice %>
+            </p>
+
+          <% } %>
+
+
+          <% if (conversation.listing.detailUrl) { %>
+
+            <a
+              class="conversation-context-link"
+              href="<%= conversation.listing.detailUrl %>"
+            >
+
+              <span>
+                Xem sản phẩm
+              </span>
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+
+            </a>
+
+          <% } else { %>
+
+            <p class="conversation-hidden-note">
+              Bài đăng đã ẩn · lịch sử trò chuyện vẫn được giữ.
+            </p>
+
+          <% } %>
+
+        </div>
+
       </div>
+
     </section>
 
     <% if (errors.page || errors.general) { %>
@@ -93,7 +195,7 @@
                 <footer class="message-meta">
                   <time><%= message.formattedCreatedAt %></time>
                   <% if (message.isMine) { %>
-                    <span><%= message.isRead ? 'Đã xem' : 'Đã gửi' %></span>
+                    <span><%= message.isRead ? 'Đã xem' : 'Đã gửi.' %></span>
                   <% } %>
                 </footer>
               </article>
@@ -103,7 +205,6 @@
       <% } else { %>
         <div class="message-thread-empty" role="status">
           <h2>Chưa có tin nhắn.</h2>
-          <p>Gửi lời nhắn đầu tiên để bắt đầu trao đổi về sản phẩm này.</p>
         </div>
       <% } %>
       <div id="latest" tabindex="-1" aria-hidden="true"></div>
@@ -118,27 +219,51 @@
         <%- include('../partials/csrf') %>
         <div class="message-compose-heading">
           <label for="messageContent">Nội dung tin nhắn</label>
-          <span>Tối đa 2.000 ký tự</span>
         </div>
-        <textarea
-          class="form-control <%= errors.content ? 'is-invalid' : '' %>"
-          id="messageContent"
-          name="content"
-          rows="4"
-          maxlength="2000"
-          required
-          aria-required="true"
-          aria-invalid="<%= errors.content ? 'true' : 'false' %>"
-          aria-describedby="messageContentFeedback"
-          placeholder="Hỏi người bán về tình trạng hoặc cách nhận sản phẩm"
-        ><%= oldInput.content %></textarea>
+        <div class="message-compose-control">
+
+          <textarea
+            class="form-control <%= errors.content ? 'is-invalid' : '' %>"
+            id="messageContent"
+            name="content"
+            rows="4"
+            maxlength="2000"
+            required
+            aria-required="true"
+            aria-invalid="<%= errors.content ? 'true' : 'false' %>"
+            aria-describedby="messageContentFeedback"
+            placeholder="Hỏi người bán về tình trạng hoặc cách nhận sản phẩm"
+          ><%= oldInput.content %></textarea>
+
+
+          <button
+            class="message-send-button"
+            type="submit"
+            aria-label="Gửi tin nhắn"
+            title="Gửi tin nhắn"
+          >
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M22 2 11 13"></path>
+              <path d="m22 2-7 20-4-9-9-4Z"></path>
+            </svg>
+
+          </button>
+
+        </div>
         <div
-          class="<%= errors.content ? 'invalid-feedback' : 'form-text' %> field-feedback-slot"
+          class="<%= errors.content ? 'invalid-feedback d-block' : 'form-text' %> field-feedback-slot"
           id="messageContentFeedback"
-        ><%= errors.content || '' %></div>
-        <div class="message-compose-actions">
-          <p>Chỉ gửi nội dung văn bản. Không chia sẻ thông tin nhạy cảm.</p>
-          <button class="btn btn-primary" type="submit">Gửi tin nhắn</button>
+        >
+          <%= errors.content || '' %>
         </div>
       </form>
     <% } else { %>

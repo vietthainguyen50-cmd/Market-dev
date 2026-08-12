@@ -11,6 +11,7 @@ const {
 const router = express.Router();
 
 router.get('/profile', requireAuth, profileController.showProfile);
+router.get('/users/:id', profileController.showPublicSellerProfile,);
 router.get('/profile/edit', requireAuth, profileController.showEditProfile);
 router.put(
   '/profile',
